@@ -4,6 +4,15 @@
 ///////////////////////////////////////////////////////////
 import * as d3 from "d3";
 import React, { Component } from 'react';
+import {
+  SafeAreaView,
+  StyleSheet,
+  ScrollView,
+  View,
+  Text,
+  StatusBar,
+} from 'react-native';
+import Svg,{ Circle, G, Path, Rect } from 'react-native-svg'
 
 var FORCE = (function(nsp){
 
@@ -187,30 +196,16 @@ class GraphApp extends React.Component {
               />);
           });
         return (
-          <div className="graph__container">
-            <form className="form-addSystem" onSubmit={this.addNode.bind(this)}>
-              <h4 className="form-addSystem__header">New Node</h4>
-              <div className="form-addSystem__group">
-                <input value={this.state.name} onChange={this.handleAddNode.bind(this)}
-                  name="name"
-                  className="form-addSystem__input"
-                  id="name"
-                  placeholder="Name"/>
-                <label className="form-addSystem__label" htmlFor="title">Name</label>
-              </div>
-              <div className="form-addSystem__group">
-                <input className="btnn" type="submit" value="add node" />
-              </div>
-            </form>
-            <svg className="graph" width={FORCE.width} height={FORCE.height}>
-                <g>
+          <View className="graph__container">
+            <Svg className="graph" width={FORCE.width} height={FORCE.height}>
+                <G>
                     {links}
-                </g>
-                <g>
+                </G>
+                <G>
                     {nodes}
-                </g>
-            </svg>
-          </div>
+                </G>
+            </Svg>
+          </View>
         );
     }
 }
@@ -234,7 +229,7 @@ class Link extends React.Component {
 
     render() {
       return (
-        <line className='link' />
+        <View className='link' />
       );
     }
 }
@@ -258,10 +253,10 @@ class Node extends React.Component {
 
     render() {
       return (
-        <g className='node'>
-          <circle onClick={this.props.addLink}/>
-          <text>{this.props.data.name}</text>
-        </g>
+        <G className='node'>
+          <Circle onClick={this.props.addLink}/>
+          <Text>{this.props.data.name}</Text>
+        </G>
       );
     }
 }
