@@ -266,4 +266,4 @@ class Node extends React.Component {
     }
 }
 
-// ReactDOM.render(<App />, document.querySelector('#root'))
+export default GraphApp;
