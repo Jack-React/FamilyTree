@@ -23,6 +23,7 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import SvgExample from './components/svgtest';
+import GraphApp from './components/graphMaker';
 import AwesomeHierarchyGraph from 'react-native-d3-tree-graph'
 
 var root = {
