@@ -6,20 +6,10 @@ import {
   View,
   StatusBar,
 } from 'react-native';
-import Svg,{Defs,Pattern,Image, Circle, G, Path, Text, Rect } from 'react-native-svg';
-class TestApp extends Component{
-  constructor(props){
-    super(props);
-    this.state = {nodes:[]};
-  }
-  render(){
-    return(
-      <Graph/>
-  );
-  }
-}
+import Svg,{Defs,Pattern,Image, Circle, G, Path, Text as SvgText, Rect, TextPath, TSpan } from 'react-native-svg';
+
 var nodes = [
-  {"name": "bulbasure", "image":"mother"},
+  {"name": "bulbasure", "image":"mother"}, // temprary centerNode
   {"name": "pikachu", "image":"son"},
   // {"id": "Carol"}
 ];
@@ -29,11 +19,32 @@ var links = [
   // {"source": "Bob", "target": "Carol" }
 ];
 
+class TestApp extends Component{
+  constructor(props){
+    super(props);
+    this.state = {nodes:[]};
+  }
+  render(){
+    return(
+      <Graph centerNode = {nodes[0]}/>
+  );
+  }
+}
+
+
 // used to render nodes and links in the right positions
 class Graph extends Component {
   constructor(props) {
     super(props);
-    const centerNode = this.props.centerNode; // i am in the center
+    this.state = {
+      centerNode : this.props.centerNode,
+      //display generational rows
+      row1: [],
+      row2: [],
+      row3: [],
+
+    };
+    // const centerNode = this.props.centerNode; // i am in the cente
 
   }
   /*
@@ -48,10 +59,12 @@ class Graph extends Component {
     for (var i = 0; i < links.length; i++) {
       let link = links[i]
       if (link.relationship == "parent-child"){
-        if(link.person1 == centerNode){// if i am the parent
+        if(link.person1 == this.state.centerNode){// if i am the parent
           // then person2 gets sent to row 3
-        }else if (link.person2== centerNode) {
+          this.state.row3.push(MakeNode);
+        }else if (link.person2== this.state.centerNode) {
           // then person1 get sent to row 1
+          this.state.row1.push(MakeNode);
         }
       }
     }
@@ -61,8 +74,7 @@ class Graph extends Component {
 
   //acepts a node object and makes a Node with it
   MakeNode(node){
-
-    return ;
+    return <Node/> ;
   }
 
   render(){
@@ -134,9 +146,9 @@ class Node extends Component{
     // viewbox is causing the clipping
     return(
       <Svg height="512" width="512">
-        <G>
+        <G >
 
-        <Defs>
+        <Defs id="circle">
           <Pattern id="image" x="0%" y="0%" height="100%" width="100%"
                    viewBox="0 0 512 512">
           <Image x="0%" y="0%" width="512" height="512" href={require ('./stock-pokemon-photos/bulbasure.png')}clipPath="url(#clip)"  ></Image>
@@ -145,6 +157,13 @@ class Node extends Component{
 
         <Circle id="sd" class="medium" cx="5%" cy="40%" r="5%" fill="url(#image)" stroke="lightblue" stroke-width="0.5%" />
         </G>
+        <SvgText fill="#000" fontSize="14">
+            <TextPath href="#circle">
+              <TSpan dx="0" dy={-20}>
+                Text along a curved path2
+              </TSpan>
+            </TextPath>
+          </SvgText>
       </Svg>
     )
 
@@ -177,7 +196,13 @@ const styles = {
     flexDirection: 'row',
     justifyContent: 'space-around',
 
-  }
+  },
+  text: {
+    marginTop: 30,
+    fontSize: 40,
+    color: '#0250a3',
+    fontWeight: 'bold',
+  },
 }
 
 export default TestApp;
