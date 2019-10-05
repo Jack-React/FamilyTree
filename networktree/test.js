@@ -5,8 +5,10 @@ import {
   ScrollView,
   View,
   StatusBar,
+  Image,
+  Text,
 } from 'react-native';
-import Svg,{Defs,Pattern,Image, Circle, G, Path, Text as SvgText, Rect, TextPath, TSpan } from 'react-native-svg';
+import Svg,{Defs,Pattern, Circle, G, Path, Text as SvgText, Rect, TextPath, TSpan } from 'react-native-svg';
 
 var nodes = [
   {"name": "bulbasure", "image":"mother"}, // temprary centerNode
@@ -43,9 +45,10 @@ class Graph extends Component {
       row2: [],
       row3: [],
 
+
     };
     // const centerNode = this.props.centerNode; // i am in the cente
-
+      console.log('graph initiated, centernode is ' + this.state.centerNode.name);
   }
   /*
   find the person in the nodes object
@@ -54,36 +57,71 @@ class Graph extends Component {
   have the props display it
    */
 
-  SortNodes(links){
+  SortNodesIntoState(links){
     // loop over the relationships to determing positions
+
     for (var i = 0; i < links.length; i++) {
-      let link = links[i]
+
+      let link = links[i];
+      let node ={"name": "bulbasure", "image":"mother"};
+
       if (link.relationship == "parent-child"){
-        if(link.person1 == this.state.centerNode){// if i am the parent
+        if(link.person1 == this.state.centerNode.name){// if i am the parent
+          node.name = link.person2;
           // then person2 gets sent to row 3
-          this.state.row3.push(MakeNode);
-        }else if (link.person2== this.state.centerNode) {
+          // this.state.row3.push(MakeNode(link));
+
+
+          // push to array
+          // this.setState({ row3: [...this.state.row3, this.MakeNode(node)] });
+          // // Create a new array based on current state:
+          // let row3 = [...this.state.row3];
+          //
+          // // Add item to it
+          // row3.push(this.MakeNode(node));
+          // console.log(row3);
+          //
+          // // Set state
+          // this.setState({ row3 :row3 });
+
+          this.setState(previousState => ({
+               row3: [...previousState.row3, this.MakeNode(node)]
+           }));
+
+          // DEBUG:
+          console.log("row3 changed -newly added -----" );
+          console.log(this.MakeNode(node));
+
+        }else if (link.person2== this.state.centerNode.name) {
+          node.name = link.person1;
           // then person1 get sent to row 1
-          this.state.row1.push(MakeNode);
+          // this.state.row1.push(MakeNode);
+          this.setState({ row1: [...this.state.row1, this.MakeNode(node)] });
         }
       }
     }
 
-    return new Error('relationship between the nodes not in bound');
+    // return new Error('relationship between the nodes not in bound');
+  }
+
+  componentDidMount(){
+    this.SortNodesIntoState(links);
   }
 
   //acepts a node object and makes a Node with it
   MakeNode(node){
-    return <Node/> ;
+    return <Node name = {node.name} /> ;
   }
 
   render(){
+    console.log(this.state.row3);
+
     /*
 
      */
     return(
       <View style={styles.elementsContainer}>
-        <Node/>
+        <Node name = "b1"/>
         <Node/>
         <Node/>
       </View>
@@ -96,7 +134,6 @@ class Graph extends Component {
 class Row extends Component{
   constructor(props){
     super(props);
-    this.state = {name:'Frarthur'};
   };
 
 
@@ -117,16 +154,20 @@ class Node extends Component{
   constructor(props){
     super(props);
     this.state = {
-      name:'',
+      name:'bulbasure',
       image: './stock-pokemon-photos/bulbasure.png ',
     };
 
   }
 
   UpdateState(){
-    (this.name) ? (this.setState({name:this.name})): (this.setState({name:'Default'}));
-    if (this.image) {
-      (this.setState({image:this.image}))
+
+    if (this.props.name) {
+      (this.setState({name:this.props.name}))
+      console.log( ' node: name update from-to '+  this.props.name + this.state.name);
+    };
+    if (this.props.image) {
+      (this.setState({image:this.props.image}))
     };
   }
 
@@ -142,29 +183,18 @@ class Node extends Component{
 
   render(){
 
+
     // defaults
     // viewbox is causing the clipping
     return(
-      <Svg height="512" width="512">
-        <G >
-
-        <Defs id="circle">
-          <Pattern id="image" x="0%" y="0%" height="100%" width="100%"
-                   viewBox="0 0 512 512">
-          <Image x="0%" y="0%" width="512" height="512" href={require ('./stock-pokemon-photos/bulbasure.png')}clipPath="url(#clip)"  ></Image>
-          </Pattern>
-        </Defs>
-
-        <Circle id="sd" class="medium" cx="5%" cy="40%" r="5%" fill="url(#image)" stroke="lightblue" stroke-width="0.5%" />
-        </G>
-        <SvgText fill="#000" fontSize="14">
-            <TextPath href="#circle">
-              <TSpan dx="0" dy={-20}>
-                Text along a curved path2
-              </TSpan>
-            </TextPath>
-          </SvgText>
-      </Svg>
+      <View>
+       <Image
+         source={require('./stock-pokemon-photos/bulbasure.png')}
+         //borderRadius style will help us make the Round Shape Image
+         style={{ width: 60, height: 60, borderRadius: 100 / 2 }}
+       />
+       <Text style={styles.text}>{this.state.name}</Text>
+     </View>
     )
 
 
@@ -188,8 +218,8 @@ const styles = {
     backgroundColor: '#ecf5fd',
     // marginLeft: 24,
     // marginRight: 24,
-    // marginBottom: 24,
-    paddingTop: 80,
+    marginBottom: 24,
+    paddingTop: 60,
   },
   rowContainer:{
     flex: 1 ,
@@ -198,10 +228,12 @@ const styles = {
 
   },
   text: {
-    marginTop: 30,
-    fontSize: 40,
+    marginTop: 8,
+    fontSize: 15,
+    // width: 20,
     color: '#0250a3',
     fontWeight: 'bold',
+    // textAlign: 'center'
   },
 }
 
