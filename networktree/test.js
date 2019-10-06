@@ -133,9 +133,9 @@ class Graph extends Component {
      */
     return(
       <View style={styles.elementsContainer}>
-        <Node name = "b1"/>
-        <Node/>
-        <Node/>
+        <Row nodes = {this.state.row1}/>
+        <Row nodes = {this.state.row2}/>
+        <Row nodes = {this.state.row3}/>
       </View>
     )
   }
@@ -157,7 +157,8 @@ class Row extends Component{
 
     return(
       <View style={styles.rowContainer}>
-        <Node/>
+        {this.props.nodes}
+
       </View>);
   }
 }
