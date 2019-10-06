@@ -22,6 +22,9 @@ var links = [
   {"person1": "bulbasure", "person2": "squrtile", "relationship": "parent-child" },
 ];
 
+var sampleLocation =
+  {"x": "12", "y": "43", "z": "0" };
+
 class TestApp extends Component{
   constructor(props){
     super(props);
@@ -57,6 +60,26 @@ class Graph extends Component {
       new Error('Graph started with empty nodes state: empty graph');
     }
   }
+
+  // rewrites this.state.nodes to have new location attribute
+  UpdateNodeLocation(name, location){
+    for (var i = 0; i < this.state.nodes.length; i++) {
+      if (this.state.nodes[i].name == name ) {
+        var newState = {...this.state};
+        //mutates state
+        newState.nodes[i].location = location;
+        // set new state
+        this.setState(newState);
+        console.log('               location updated at:');
+        console.log(this.state.nodes[i]);
+      }
+  }
+}
+
+
+
+
+
   /*
   find the person in the nodes object
   return them in a list of the nodes object format
@@ -90,7 +113,6 @@ class Graph extends Component {
           this.InsertInto(this.FindNode(link.person1), 'row1');
         }
 
-
       }
     }
 
@@ -119,11 +141,17 @@ class Graph extends Component {
 
   componentDidMount(){
     this.SortNodesIntoState(links);
+    // this.ConnectNodes();
+    this.UpdateNodeLocation('bulbasure', sampleLocation);
   }
 
   //acepts a node object and makes a Node with it
   MakeNodeComponent(node){
-    return <Node name = {node.name} /> ;
+    return (
+      <View>
+        <Node name = {node.name} updateNodeLocation={this.UpdateNodeLocation.bind(this)} />
+      </View>
+      )
   }
 
   render(){
@@ -137,9 +165,9 @@ class Graph extends Component {
      */
     return(
       <View style={styles.elementsContainer}>
-        <Row nodes = {this.state.row1}/>
-        <Row nodes = {this.state.row2}/>
-        <Row nodes = {this.state.row3}/>
+        <Row nodes = {this.state.row1} key = 'row1'/>
+        <Row nodes = {this.state.row2} key = 'row2'/>
+        <Row nodes = {this.state.row3} key = 'row3'/>
       </View>
     )
   }
@@ -176,6 +204,10 @@ class Node extends Component{
     };
 
   }
+  // this is stored in the nparent
+  updateNodeLocation(name,location){
+    this.props.updateNodeLocation(name,location);
+  }
 
   UpdateState(){
 
@@ -186,7 +218,30 @@ class Node extends Component{
     if (this.props.image) {
       (this.setState({image:this.props.image}))
     };
+    // updateNodeLocation(this.state.name, );
   }
+
+
+  measureView(event) {
+    console.log('event peroperties: ',  event.nativeEvent.layout.x, event.nativeEvent.layout.y,);
+    this.setState({
+            x: event.nativeEvent.layout.x,
+            y: event.nativeEvent.layout.y,
+            width: event.nativeEvent.layout.width,
+            height: event.nativeEvent.layout.height
+        })
+
+  // this works when put into node view method
+  //       ref={(ref) => { this.marker = ref }}
+  // onLayout={({nativeEvent}) => {
+  //   if (this.marker) {
+  //     this.marker.measure((x, y, width, height, pageX, pageY) => {
+  //               console.log(x, y, width, height, pageX, pageY);
+  //      })
+  //   }
+  // }}
+
+    }
 
   // due to some weird thing with react unable to dynamicly load images not in use
   // UpdateImage(){
@@ -201,10 +256,15 @@ class Node extends Component{
   render(){
 
 
-    // defaults
-    // viewbox is causing the clipping
     return(
-      <View>
+      <View ref={(ref) => { this.marker = ref }}
+onLayout={({nativeEvent}) => {
+  if (this.marker) {
+    this.marker.measure((x, y, width, height, pageX, pageY) => {
+              console.log(x, y, width, height, pageX, pageY);
+     })
+  }
+}}>
        <Image
          source={require('./stock-pokemon-photos/bulbasure.png')}
          //borderRadius style will help us make the Round Shape Image
