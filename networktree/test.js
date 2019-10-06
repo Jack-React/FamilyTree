@@ -13,13 +13,13 @@ import Svg,{Defs,Pattern, Circle, G, Path, Text as SvgText, Rect, TextPath, TSpa
 var nodes = [
   {"name": "bulbasure", "image":"mother"}, // temprary centerNode
   {"name": "pikachu", "image":"son"},
-  // {"id": "Carol"}
+  {"name": "squrtile", "image":"son"},
+
 ];
 
 var links = [
   {"person1": "bulbasure", "person2": "pikachu", "relationship": "parent-child" },
   {"person1": "bulbasure", "person2": "squrtile", "relationship": "parent-child" },
-  // {"source": "Bob", "target": "Carol" }
 ];
 
 class TestApp extends Component{
@@ -29,7 +29,7 @@ class TestApp extends Component{
   }
   render(){
     return(
-      <Graph centerNode = {nodes[0]}/>
+      <Graph centerNode = {nodes[0]} nodes = {nodes}/>
   );
   }
 }
@@ -41,15 +41,21 @@ class Graph extends Component {
     super(props);
     this.state = {
       centerNode : this.props.centerNode,
-      //display generational rows
+      nodes: this.props.nodes,
       row1: [],
       row2: [],
       row3: [],
 
 
     };
-    // const centerNode = this.props.centerNode; // i am in the cente
+    // check initiation
       console.log('graph initiated, centernode is ' + this.state.centerNode.name);
+      console.log('nodes recieved: ');
+      console.log(this.state.nodes);
+    // error checking
+    if (!this.state.nodes) {
+      new Error('Graph started with empty nodes state: empty graph');
+    }
   }
   /*
   find the person in the nodes object
@@ -61,49 +67,27 @@ class Graph extends Component {
   SortNodesIntoState(links){
 
     //add centernode into row2
-    this.setState(previousState => ({
-         row2: [...previousState.row2, this.MakeNode(this.state.centerNode)]
-     }));
+     this.InsertInto(this.state.centerNode, 'row2');
 
      // loop over the relationships to determing positions
     for (var i = 0; i < links.length; i++) {
 
       let link = links[i];
-      let node ={"name": "bulbasure", "image":"mother"};
-
 
       if (link.relationship == "parent-child"){
         if(link.person1 == this.state.centerNode.name){// if i am the parent
-          node.name = link.person2;
+
           // then person2 gets sent to row 3
-          // this.state.row3.push(MakeNode(link));
-
-
-          // push to array
-          // this.setState({ row3: [...this.state.row3, this.MakeNode(node)] });
-          // // Create a new array based on current state:
-          // let row3 = [...this.state.row3];
-          //
-          // // Add item to it
-          // row3.push(this.MakeNode(node));
-          // console.log(row3);
-          //
-          // // Set state doesnt update till the end of the function
-          // this.setState({ row3 :row3 });
-
-          this.setState(previousState => ({
-               row3: [...previousState.row3, this.MakeNode(node)]
-           }));
+          this.InsertInto(this.FindNode(link.person2), 'row3');
 
           // DEBUG:
-          console.log("row3 changed -newly added -----" );
-          console.log(this.MakeNode(node));
+          // console.log("row3 changed -newly added -----" );
+          // console.log(this.MakeNodeComponent(node));
 
         }else if (link.person2== this.state.centerNode.name) {
-          node.name = link.person1;
+
           // then person1 get sent to row 1
-          // this.state.row1.push(MakeNode);
-          this.setState({ row1: [...this.state.row1, this.MakeNode(node)] });
+          this.InsertInto(this.FindNode(link.person1), 'row1');
         }
 
 
@@ -113,12 +97,32 @@ class Graph extends Component {
     // return new Error('relationship between the nodes not in bound');
   }
 
+  // takes name, finds node from this.state.nodes and returns it
+  FindNode(name){
+    for (var i = 0; i < this.state.nodes.length; i++) {
+      if (this.state.nodes[i].name == name ) {
+        return this.state.nodes[i];
+      }
+    }
+
+    return new Error('FindNode error, no node with matching name in this.state.nodes');
+  }
+  // puts node in the row
+  InsertInto(node, row){
+    //copy state
+    var newState = {...this.state};
+    //mutates state
+    newState[row].push(this.MakeNodeComponent(node));
+    // set new state
+    this.setState(newState);
+  }
+
   componentDidMount(){
     this.SortNodesIntoState(links);
   }
 
   //acepts a node object and makes a Node with it
-  MakeNode(node){
+  MakeNodeComponent(node){
     return <Node name = {node.name} /> ;
   }
 
