@@ -18,6 +18,7 @@ var nodes = [
 
 var links = [
   {"person1": "bulbasure", "person2": "pikachu", "relationship": "parent-child" },
+  {"person1": "bulbasure", "person2": "squrtile", "relationship": "parent-child" },
   // {"source": "Bob", "target": "Carol" }
 ];
 
@@ -58,12 +59,18 @@ class Graph extends Component {
    */
 
   SortNodesIntoState(links){
-    // loop over the relationships to determing positions
 
+    //add centernode into row2
+    this.setState(previousState => ({
+         row2: [...previousState.row2, this.MakeNode(this.state.centerNode)]
+     }));
+
+     // loop over the relationships to determing positions
     for (var i = 0; i < links.length; i++) {
 
       let link = links[i];
       let node ={"name": "bulbasure", "image":"mother"};
+
 
       if (link.relationship == "parent-child"){
         if(link.person1 == this.state.centerNode.name){// if i am the parent
@@ -81,7 +88,7 @@ class Graph extends Component {
           // row3.push(this.MakeNode(node));
           // console.log(row3);
           //
-          // // Set state
+          // // Set state doesnt update till the end of the function
           // this.setState({ row3 :row3 });
 
           this.setState(previousState => ({
@@ -98,6 +105,8 @@ class Graph extends Component {
           // this.state.row1.push(MakeNode);
           this.setState({ row1: [...this.state.row1, this.MakeNode(node)] });
         }
+
+
       }
     }
 
@@ -114,6 +123,9 @@ class Graph extends Component {
   }
 
   render(){
+    console.log('displaying graph node arrays below :');
+    console.log(this.state.row1);
+    console.log(this.state.row2);
     console.log(this.state.row3);
 
     /*
