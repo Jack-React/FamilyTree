@@ -8,7 +8,7 @@ import {
   Image,
   Text,
 } from 'react-native';
-import Svg,{Defs,Pattern, Circle, G, Path, Text as SvgText, Rect, TextPath, TSpan } from 'react-native-svg';
+import Svg,{Defs,Pattern, Circle, G, Path, Text as SvgText, Rect, TextPath, TSpan, Line,} from 'react-native-svg';
 
 var nodes = [
   {"name": "bulbasure", "image":"mother"}, // temprary centerNode
@@ -32,7 +32,9 @@ class TestApp extends Component{
   }
   render(){
     return(
-      <Graph centerNode = {nodes[0]} nodes = {nodes}/>
+
+        <Graph centerNode = {nodes[0]} nodes = {nodes} links = {links}/>
+
   );
   }
 }
@@ -45,9 +47,15 @@ class Graph extends Component {
     this.state = {
       centerNode : this.props.centerNode,
       nodes: this.props.nodes,
+      links: this.props.links,
       row1: [],
       row2: [],
       row3: [],
+      nodesDic: {},
+      directRelationships : {
+        "parent-child" : true,
+
+      },
 
 
     };
@@ -61,6 +69,10 @@ class Graph extends Component {
     }
   }
 
+  
+
+
+
   // rewrites this.state.nodes to have new location attribute
   UpdateNodeLocation(name, location){
     for (var i = 0; i < this.state.nodes.length; i++) {
@@ -73,6 +85,13 @@ class Graph extends Component {
         console.log('               location updated at:');
         console.log(this.state.nodes[i]);
       }
+  }
+
+  // also draws relationships
+  for (var i = 0; i < this.state.links.length; i++) {
+    if (this.state.links[i].person1 == name || this.state.links[i].person2 == name) {
+      // then find location of person1 and person 2 and draw a line between them
+    }
   }
 }
 
@@ -164,14 +183,38 @@ class Graph extends Component {
 
      */
     return(
+
+
       <View style={styles.elementsContainer}>
+
+        <DrawLine/>
+
         <Row nodes = {this.state.row1} key = 'row1'/>
         <Row nodes = {this.state.row2} key = 'row2'/>
         <Row nodes = {this.state.row3} key = 'row3'/>
       </View>
+
+
     )
   }
 
+}
+
+// used to render lines
+class DrawLine extends Component{
+  constructor(props){
+    super(props);
+
+  }
+  render(){
+    return(
+      <View style={{position: 'absolute'}} >
+      <Svg height="1000" width="100">
+        <Line x1="171" y1="267" x2="72" y2="475" stroke="red" strokeWidth="2" />
+      </Svg>
+      </View>
+    );
+  }
 }
 
 // each row consists of people from the same generation
@@ -261,7 +304,12 @@ class Node extends Component{
 onLayout={({nativeEvent}) => {
   if (this.marker) {
     this.marker.measure((x, y, width, height, pageX, pageY) => {
-              console.log(x, y, width, height, pageX, pageY);
+              console.log(this.state.name, x, y, width, height, pageX, pageY);
+              var location = {
+                "x" : pageX,
+                "y" : pageY,
+              };
+              this.props.updateNodeLocation(this.state.name, location)
      })
   }
 }}>
@@ -271,6 +319,7 @@ onLayout={({nativeEvent}) => {
          style={{ width: 60, height: 60, borderRadius: 100 / 2 }}
        />
        <Text style={styles.text}>{this.state.name}</Text>
+
      </View>
     )
 
@@ -296,7 +345,7 @@ const styles = {
     // marginLeft: 24,
     // marginRight: 24,
     marginBottom: 24,
-    paddingTop: 60,
+    paddingTop: 0,
   },
   rowContainer:{
     flex: 1 ,
@@ -312,6 +361,9 @@ const styles = {
     fontWeight: 'bold',
     // textAlign: 'center'
   },
+  lineStyle:{
+    position: 'absolute',
+  }
 }
 
 export default TestApp;
