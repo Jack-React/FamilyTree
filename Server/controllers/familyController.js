@@ -98,6 +98,31 @@ exports.delete = (req, res) => {
     });
 };
 
+// find relations of one account
+exports.findRelations = (req, res) => {
+    var user_id = req.params.account_id;
+
+    Account.findById(user_id, (err, account) => {
+        if (err) { 
+            res.send(err);
+        } 
+
+        var family_id = account.family;
+        Family.findById(family_id, (err, family) => {
+            if (err) {
+                res.send(err);
+            }
+
+            var relations = family.relations.filter(relation => relation.person1 == user_id || relations.person2 == user_id);
+            
+            res.json({
+                message: "Find all relations",
+                data: relations
+            });
+        });
+    });
+}
+
 // get all members in one family
 exports.getmembers = (req, res) => {
     Family.findById(req.params.family_id , (err, family) => { 
