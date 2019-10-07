@@ -45,14 +45,15 @@ class Graph extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      centerNode : this.props.centerNode,
+      centerNode : this.props.centerNode, // this is me
       nodes: this.props.nodes,
       links: this.props.links,
-      row1: [],
+      row1: [],          // one row per generation displayed
       row2: [],
       row3: [],
-      nodesDic: {},
-      directRelationships : {
+      nodesDic: {},       // converted nodes to dic for easier acess
+      relationships: [],  // relationships are drawn links
+      directRelationships : { // to check weather a relationship should be drawn
         "parent-child" : true,
 
       },
@@ -69,7 +70,23 @@ class Graph extends Component {
     }
   }
 
-  
+  MakeNodesDic(){
+    var newState = {...this.state};
+    for (var i = 0; i < this.state.nodes.length; i++) {
+
+      newState.nodesDic[this.state.nodes[i].name] = this.state.nodes[i];
+
+      console.log('adding to nodesDic'  + this.state.nodes[i].name);
+
+    }
+    this.setState(newState);
+    console.log('finished adding to nodesDic');
+    console.log(this.state.nodesDic);
+  }
+
+
+
+
 
 
 
@@ -85,14 +102,37 @@ class Graph extends Component {
         console.log('               location updated at:');
         console.log(this.state.nodes[i]);
       }
+
   }
+  this.MakeNodesDic();
 
   // also draws relationships
   for (var i = 0; i < this.state.links.length; i++) {
     if (this.state.links[i].person1 == name || this.state.links[i].person2 == name) {
       // then find location of person1 and person 2 and draw a line between them
+      // if person1 and person2 has a location inside nodesDic
+      var p1Loc = this.state.nodesDic[this.state.links[i].person1].location;
+      var p2Loc = this.state.nodesDic[this.state.links[i].person2].location;
+      if (p1Loc &&p2Loc ) {
+        var newState = {...this.state};
+        //add a line connecting them
+        //only accepts strings so gotta coner the objects
+        var x1 = JSON.stringify(p1Loc.x);
+        var y1 = JSON.stringify(p1Loc.y);
+        var x2 = JSON.stringify(p2Loc.x);
+        var y2 = JSON.stringify(p2Loc.y);
+
+        newState.relationships.push(<View><DrawLine x1= {x1} y1= {y1} x2= {x2} y2= {y2}/></View>);
+        // set new state
+        this.setState(newState);
+      }
+
     }
   }
+
+  console.log('printing relationships');
+  console.log(this.state.relationships);
+  console.log(this.state.row3);
 }
 
 
@@ -187,7 +227,11 @@ class Graph extends Component {
 
       <View style={styles.elementsContainer}>
 
-        <DrawLine/>
+
+
+        <View>
+        {this.state.relationships}
+        </View>
 
         <Row nodes = {this.state.row1} key = 'row1'/>
         <Row nodes = {this.state.row2} key = 'row2'/>
@@ -199,24 +243,30 @@ class Graph extends Component {
   }
 
 }
-
+// <Svg height="1000" width="1000">
+//   <Line x1="171.42857360839844" y1="267" x2="278.4761962890625" y2="475" stroke="red" strokeWidth="2" />
+// </Svg>
 // used to render lines
 class DrawLine extends Component{
   constructor(props){
     super(props);
 
   }
+
   render(){
     return(
       <View style={{position: 'absolute'}} >
-      <Svg height="1000" width="100">
-        <Line x1="171" y1="267" x2="72" y2="475" stroke="red" strokeWidth="2" />
+
+      <Svg height="1000" width="1000">
+        <Line x1={this.props.x1} y1={this.props.y1} x2={this.props.x2} y2={this.props.y2} stroke="red" strokeWidth="2" />
       </Svg>
       </View>
     );
   }
 }
-
+// <Svg height="1000" width="1000">
+//   <Line x1={this.props.x1} y1={this.props.y1} x2={this.props.x2} y2={this.props.y2} stroke="red" strokeWidth="2" />
+// </Svg>
 // each row consists of people from the same generation
 class Row extends Component{
   constructor(props){
