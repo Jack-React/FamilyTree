@@ -7,6 +7,7 @@ import {
   StatusBar,
   Image,
   Text,
+  TouchableOpacity,
 } from 'react-native';
 import Svg,{Defs,Pattern, Circle, G, Path, Text as SvgText, Rect, TextPath, TSpan, Line,} from 'react-native-svg';
 
@@ -84,6 +85,31 @@ class Graph extends Component {
     console.log(this.state.nodesDic);
   }
 
+  UpdateCenterNode(name){
+    var newState = {...this.state};
+    newState.centerNode = newState.nodesDic[name] ;
+
+    // emptying out the state
+    this.state.row1 = [];
+    this.state.row2 = [];
+    this.state.row3 = [];
+    this.state.relationships = [];
+    this.state.nodes = this.props.nodes;
+    // this.props.centerNode = newState.nodesDic[name];
+    this.setState(newState);
+    this.state.centerNode = newState.nodesDic[name]; // not standaard, but it fixes centernode not updating bug
+    this.SortNodesIntoState(links);
+    console.log('               centerNode updated to:' + name);
+    console.log(this.state.centerNode);
+    console.log(newState.nodesDic[name]);
+    console.log(newState);
+    this.RedrawRelationships(name);
+
+
+  }
+  UpdateGraph(){
+
+  }
 
 
 
@@ -107,33 +133,37 @@ class Graph extends Component {
   this.MakeNodesDic();
 
   // also draws relationships
-  for (var i = 0; i < this.state.links.length; i++) {
-    if (this.state.links[i].person1 == name || this.state.links[i].person2 == name) {
-      // then find location of person1 and person 2 and draw a line between them
-      // if person1 and person2 has a location inside nodesDic
-      var p1Loc = this.state.nodesDic[this.state.links[i].person1].location;
-      var p2Loc = this.state.nodesDic[this.state.links[i].person2].location;
-      if (p1Loc &&p2Loc ) {
-        var newState = {...this.state};
-        //add a line connecting them
-        //only accepts strings so gotta coner the objects
-        var x1 = JSON.stringify(p1Loc.x);
-        var y1 = JSON.stringify(p1Loc.y);
-        var x2 = JSON.stringify(p2Loc.x);
-        var y2 = JSON.stringify(p2Loc.y);
-
-        newState.relationships.push(<View><DrawLine x1= {x1} y1= {y1} x2= {x2} y2= {y2}/></View>);
-        // set new state
-        this.setState(newState);
-      }
-
-    }
-  }
-
-  console.log('printing relationships');
-  console.log(this.state.relationships);
-  console.log(this.state.row3);
+  this.RedrawRelationships(name);
 }
+
+
+  RedrawRelationships(name){
+    for (var i = 0; i < this.state.links.length; i++) {
+      if (this.state.links[i].person1 == name || this.state.links[i].person2 == name) {
+        // then find location of person1 and person 2 and draw a line between them
+        // if person1 and person2 has a location inside nodesDic
+        var p1Loc = this.state.nodesDic[this.state.links[i].person1].location;
+        var p2Loc = this.state.nodesDic[this.state.links[i].person2].location;
+        if (p1Loc &&p2Loc ) {
+          var newState = {...this.state};
+          //add a line connecting them
+          //only accepts strings so gotta coner the objects
+          var x1 = JSON.stringify(p1Loc.x);
+          var y1 = JSON.stringify(p1Loc.y);
+          var x2 = JSON.stringify(p2Loc.x);
+          var y2 = JSON.stringify(p2Loc.y);
+
+          newState.relationships.push(<View><DrawLine x1= {x1} y1= {y1} x2= {x2} y2= {y2}/></View>);
+          // set new state
+          this.setState(newState);
+        }
+
+      }
+    }
+
+    console.log('printing relationships');
+    console.log(this.state.relationships);
+  }
 
 
 
@@ -201,14 +231,17 @@ class Graph extends Component {
   componentDidMount(){
     this.SortNodesIntoState(links);
     // this.ConnectNodes();
-    this.UpdateNodeLocation('bulbasure', sampleLocation);
+
   }
 
   //acepts a node object and makes a Node with it
   MakeNodeComponent(node){
     return (
       <View>
-        <Node name = {node.name} updateNodeLocation={this.UpdateNodeLocation.bind(this)} />
+        <Node
+          name = {node.name}
+          updateNodeLocation={this.UpdateNodeLocation.bind(this)}
+          updateCenterNode={this.UpdateCenterNode.bind(this)}  />
       </View>
       )
   }
@@ -218,6 +251,8 @@ class Graph extends Component {
     console.log(this.state.row1);
     console.log(this.state.row2);
     console.log(this.state.row3);
+    console.log('current state is');
+    console.log(this.state);
 
     /*
 
@@ -302,6 +337,11 @@ class Node extends Component{
     this.props.updateNodeLocation(name,location);
   }
 
+  updateCenterNode(name){
+    this.props.updateCenterNode(name);
+    console.log('you have touched' + this.state.name);
+  }
+
   UpdateState(){
 
     if (this.props.name) {
@@ -350,6 +390,7 @@ class Node extends Component{
 
 
     return(
+
       <View ref={(ref) => { this.marker = ref }}
 onLayout={({nativeEvent}) => {
   if (this.marker) {
@@ -363,12 +404,14 @@ onLayout={({nativeEvent}) => {
      })
   }
 }}>
+      <TouchableOpacity style={styles.button} onPress={() => this.updateCenterNode(this.state.name)}>
        <Image
          source={require('./stock-pokemon-photos/bulbasure.png')}
          //borderRadius style will help us make the Round Shape Image
          style={{ width: 60, height: 60, borderRadius: 100 / 2 }}
        />
        <Text style={styles.text}>{this.state.name}</Text>
+       </TouchableOpacity>
 
      </View>
     )
@@ -413,7 +456,12 @@ const styles = {
   },
   lineStyle:{
     position: 'absolute',
-  }
+  },
+  button: {
+    alignItems: 'center',
+    backgroundColor: '#DDDDDD',
+    padding: 10
+  },
 }
 
 export default TestApp;
