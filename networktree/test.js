@@ -8,7 +8,9 @@ import {
   Image,
   Text,
 } from 'react-native';
-import Svg,{Defs,Pattern, Circle, G, Path, Text as SvgText, Rect, TextPath, TSpan, Line,} from 'react-native-svg';
+import Svg, { Defs, Pattern, Circle, G, Path, Text as SvgText, Rect, TextPath, TSpan, Line, } from 'react-native-svg';
+
+const ACCOUNTS = "http://52.14.226.1:8080/api/accounts"
 
 var nodes = [
   {"name": "bulbasure", "image":"mother"}, // temprary centerNode
@@ -22,16 +24,73 @@ var links = [
   {"person1": "bulbasure", "person2": "squrtile", "relationship": "parent-child" },
 ];
 
-var linkurl = "http://localhost:8080/api/accounts/relations/597b0ddfe8e0bd240cc166f2f1ececb493cfda372865096fc84bb9ecbd362c55";
+// ! Snail code from this line
+// fetch links data from server
 
+// this is the userid in the center
+var centerUsrId = '597b0ddfe8e0bd240cc166f2f1ececb493cfda372865096fc84bb9ecbd362c55';
+
+// this is the server url of relation links
+var linkurl = ACCOUNTS + "/relations/" + centerUsrId;
+
+// fetch the json data from links
 fetch(linkurl)
-  .then((res) => res.json())
-  .then((resjson) => { 
-    console.log(resjson.data);
-  })
-  .catch((err) => { 
-    console.error(err);
-});
+    .then((res) => res.json())
+    .then((resjson) => { 
+        links = resjson.data;
+        console.log(links);
+    })
+    .catch((err) => { 
+        console.error(err);
+    });
+
+// fetch the name of given account_id
+function getInfo(userid) { 
+    var accountUrl = ACCOUNTS + userid;
+    fetch(accountUrl)
+        .then((res) => res.json())
+        .then((resjson) => {
+            console.log(resjson.data);
+
+            var firstName = resjson.data.firstName;
+            var lastName = resjson.data.lastName;
+            var name = firstName + ' ' + lastName;
+
+            console.log(name);
+            return name;
+        })
+        .catch((err) => { 
+            console.error(err);
+        });
+}
+
+// get unique id from links
+var userids = [];
+
+for (var i = 0; i < links.length; i++) { 
+    var person1id = links[i].person1;
+    var person2id = links[i].person2;
+    if (userids.indexOf(person1id) < 0)
+        userids.push(person1id);
+    if (userids.indexOf(person2id) < 0)
+        userids.push(person2id);
+}
+
+// create nodes
+var nodes = [];
+
+// ! For now, Nodes is [{"userid" : String, "name": String}], i.e. no image
+for (var i = 0; i < userids.length; i++) { 
+    var userid = userids[i];
+    var userName = getInfo(userid);
+    var data = {
+        userid: userid,
+        name: userName
+        }
+    nodes.push(data);
+}
+
+// ! Snail code to this line
 
 var sampleLocation =
   {"x": "12", "y": "43", "z": "0" };
