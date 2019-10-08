@@ -35,7 +35,7 @@ exports.new = (req, res) => {
 };
 
 // Create relation schema and push it into family
-exports.addrelationship = (req, res) => { 
+exports.addRelation = (req, res) => { 
     data = {
         person1: req.body.person1,
         person2: req.body.person2,
@@ -50,6 +50,24 @@ exports.addrelationship = (req, res) => {
         }
     );
 };
+
+// Delete relation of family
+// TODO complete this function
+// exports.deleteRelation = (req, res) => { 
+//     Family.findById(req.params.family_id, (err, family) => { 
+//         if (err) { 
+//             res.send(err);
+//         }
+//         family.relations
+//         for (var i = 0; i < arrayOfObjects.length; i++) {
+//             var obj = arrayOfObjects[i];
+
+//             if (listToDelete.indexOf(obj.id) !== -1) {
+//                 arrayOfObjects.splice(i, 1);
+//             }
+//         }
+//     });
+// }
 
 // View one family by id
 exports.view = (req, res) => {
@@ -103,9 +121,9 @@ exports.findRelations = (req, res) => {
     var user_id = req.params.account_id;
 
     Account.findById(user_id, (err, account) => {
-        if (err) { 
+        if (err) {
             res.send(err);
-        } 
+        }
 
         var family_id = account.family;
         Family.findById(family_id, (err, family) => {
@@ -113,8 +131,8 @@ exports.findRelations = (req, res) => {
                 res.send(err);
             }
 
-            var relations = family.relations.filter(relation => relation.person1 == user_id || relations.person2 == user_id);
-            
+            var relations = family.relations.filter(relation => relation.person1 == user_id || relation.person2 == user_id);
+
             res.json({
                 message: "Find all relations",
                 data: relations

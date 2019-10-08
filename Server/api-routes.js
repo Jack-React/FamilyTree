@@ -6,7 +6,7 @@ const familyController = require("./controllers/familyController");
 router.get('/', (_req, res) => {
     res.json({
         status: "Success!",
-        message: "Welcome to COMP30022 Project 1 API"
+        message: "Welcome to COMP30022 Project API"
     });
 });
 

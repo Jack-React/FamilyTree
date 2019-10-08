@@ -5,7 +5,20 @@ const familySchema = mongoose.Schema({
         type: String,
         required: true
     },
-    relations: [{person1: String, person2: String, relationship: String}]
+    relations: [{
+        person1: {
+            type: String,
+            required: true
+        },
+        person2: {
+            type: String,
+            required: true
+        },
+        relationship: {
+            type: String, 
+            required: true
+        }
+    }]
 });
 
 var Family = module.exports = mongoose.model('family', familySchema);
