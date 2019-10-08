@@ -22,6 +22,17 @@ var links = [
   {"person1": "bulbasure", "person2": "squrtile", "relationship": "parent-child" },
 ];
 
+var linkurl = "http://localhost:8080/api/accounts/relations/597b0ddfe8e0bd240cc166f2f1ececb493cfda372865096fc84bb9ecbd362c55";
+
+fetch(linkurl)
+  .then((res) => res.json())
+  .then((resjson) => { 
+    console.log(resjson.data);
+  })
+  .catch((err) => { 
+    console.error(err);
+});
+
 var sampleLocation =
   {"x": "12", "y": "43", "z": "0" };
 
