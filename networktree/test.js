@@ -29,13 +29,52 @@ var sampleLocation =
 class TestApp extends Component{
   constructor(props){
     super(props);
-    this.state = {nodes:[]};
+    this.state = {
+      nodes:nodes,
+      centerNode: nodes[0], // hardcoded center node
+      links: links,
+
+    };
   }
+
+  UpdateCenterNode(name){
+    var newState = {...this.state};
+    newState.centerNode = this.FindNode(name) ;
+
+    this.setState(newState);
+
+  }
+  FindNode(name){
+    for (var i = 0; i < this.state.nodes.length; i++) {
+      if (this.state.nodes[i].name == name ) {
+        return this.state.nodes[i];
+      }
+    }
+    return new Error('FindNode error, no node with matching name in this.state.nodes');
+  }
+
+  MakeGraph(centerNode){
+    return (
+
+      <Graph centerNode = {centerNode} nodes = {this.state.nodes} links = {this.state.links}
+      updateCenterNode={this.UpdateCenterNode.bind(this)}
+      />
+
+    );
+  }
+
+
   render(){
+
+
+    let graph;
+    graph = (this.MakeGraph(this.state.centerNode));
+    console.log('      re rendering Graph: displaying  state  ');
+    console.log(this.state);
+    console.log(graph);
     return(
 
-        <Graph centerNode = {nodes[0]} nodes = {nodes} links = {links}/>
-
+      graph
   );
   }
 }
@@ -85,35 +124,10 @@ class Graph extends Component {
     console.log(this.state.nodesDic);
   }
 
-  UpdateCenterNode(name){
-    var newState = {...this.state};
-    newState.centerNode = newState.nodesDic[name] ;
-
-    // emptying out the state
-    this.state.row1 = [];
-    this.state.row2 = [];
-    this.state.row3 = [];
-    this.state.relationships = [];
-    this.state.nodes = this.props.nodes;
-    // this.props.centerNode = newState.nodesDic[name];
-    this.setState(newState);
-    this.state.centerNode = newState.nodesDic[name]; // not standaard, but it fixes centernode not updating bug
-    this.SortNodesIntoState(links);
-    console.log('               centerNode updated to:' + name);
-    console.log(this.state.centerNode);
-    console.log(newState.nodesDic[name]);
-    console.log(newState);
-    this.RedrawRelationships(name);
-
-
+  updateCenterNode(name){
+    this.props.updateCenterNode(name);
+    console.log('Graph :you have touched ' + name);
   }
-  UpdateGraph(){
-
-  }
-
-
-
-
 
 
   // rewrites this.state.nodes to have new location attribute
@@ -164,10 +178,6 @@ class Graph extends Component {
     console.log('printing relationships');
     console.log(this.state.relationships);
   }
-
-
-
-
 
   /*
   find the person in the nodes object
@@ -230,6 +240,7 @@ class Graph extends Component {
 
   componentDidMount(){
     this.SortNodesIntoState(links);
+    console.log('graph mounted');
     // this.ConnectNodes();
 
   }
@@ -241,7 +252,7 @@ class Graph extends Component {
         <Node
           name = {node.name}
           updateNodeLocation={this.UpdateNodeLocation.bind(this)}
-          updateCenterNode={this.UpdateCenterNode.bind(this)}  />
+          updateCenterNode={this.updateCenterNode.bind(this)}  />
       </View>
       )
   }
