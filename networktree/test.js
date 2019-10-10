@@ -27,56 +27,83 @@ var sampleLocation =
   {"x": "12", "y": "43", "z": "0" };
 
 class TestApp extends Component{
-  constructor(props){
-    super(props);
-    this.state = {
-      nodes:nodes,
-      centerNode: nodes[0], // hardcoded center node
-      links: links,
+	constructor(props){
+		super(props);
+		this.state = {
+			nodes:nodes,
+			centerNode: nodes[0], // hardcoded center node
+			links: links,
+			updated: false
+		};
+	}
 
-    };
-  }
+	UpdateCenterNode(name){
+		this.setState({
+			centerNode: this.FindNode(name),
+			updated: true
+		})
+	}
 
-  UpdateCenterNode(name){
-    var newState = {...this.state};
-    newState.centerNode = this.FindNode(name) ;
+	FindNode(name){
+		for (var i = 0; i < this.state.nodes.length; i++) {
+			if (this.state.nodes[i].name == name ) {
+				return this.state.nodes[i];
+			}
+		}
+		return new Error('FindNode error, no node with matching name in this.state.nodes');
+	}
 
-    this.setState(newState);
+	MakeGraph(centerNode){
+		if (this.state.updated == true){
+			this.setState({updated: false});
+			return null
+		}
+		else {
+			return (
+				<Graph 
+					centerNode = {centerNode} 
+					nodes = {this.state.nodes} 
+					links = {this.state.links}
+					updateCenterNode={this.UpdateCenterNode.bind(this)}
+				/>
+			)
+		}
+	}
+	// 	console.log("!@#", centerNode)
+	// 	if (centerNode.name == 'pikachu'){
+	// 		console.log("QWE")
+	// 		return (
+	// 			// <Graph 
+	// 			// 	centerNode = {nodes[0]} 
+	// 			// 	nodes = {this.state.nodes} 
+	// 			// 	links = {this.state.links}
+	// 			// 	updateCenterNode={this.UpdateCenterNode.bind(this)}
+	// 			// />
+	// 			<View><Text>123</Text></View>
+	// 		);
+	// 	}
+	// 	else {
+	// 		console.log("AAA")
+	// 		return (
+	// 			<Graph 
+	// 				centerNode = {nodes[1]} 
+	// 				nodes = {this.state.nodes} 
+	// 				links = {this.state.links}
+	// 				updateCenterNode={this.UpdateCenterNode.bind(this)}
+	// 			/>
+	// 		// <View><Text>123</Text></View>
 
-  }
-  FindNode(name){
-    for (var i = 0; i < this.state.nodes.length; i++) {
-      if (this.state.nodes[i].name == name ) {
-        return this.state.nodes[i];
-      }
-    }
-    return new Error('FindNode error, no node with matching name in this.state.nodes');
-  }
+	// 		);
+	// 	}
+	// }
 
-  MakeGraph(centerNode){
-    return (
-
-      <Graph centerNode = {centerNode} nodes = {this.state.nodes} links = {this.state.links}
-      updateCenterNode={this.UpdateCenterNode.bind(this)}
-      />
-
-    );
-  }
-
-
-  render(){
-
-
-    let graph = [];
-    graph.push(this.MakeGraph(this.state.centerNode));
-    console.log('      re rendering Graph: displaying  state  ');
-    console.log(this.state);
-    console.log(graph);
-    return(
-
-      graph[graph.length-1]
-  );
-  }
+	render(){
+		console.log('re rendering Graph: displaying  state  ');
+		// console.log(this.state);
+		return(
+			this.MakeGraph(this.state.centerNode)
+		);
+	}
 }
 
 
@@ -95,15 +122,14 @@ class Graph extends Component {
       relationships: [],  // relationships are drawn links
       directRelationships : { // to check weather a relationship should be drawn
         "parent-child" : true,
-
       },
 
 
     };
     // check initiation
-      console.log('graph initiated, centernode is ' + this.state.centerNode.name);
-      console.log('nodes recieved: ');
-      console.log(this.state.nodes);
+    //   console.log('graph initiated, centernode is ' + this.state.centerNode.name);
+    //   console.log('nodes recieved: ');
+    //   console.log(this.state.nodes);
     // error checking
     if (!this.state.nodes) {
       new Error('Graph started with empty nodes state: empty graph');
@@ -116,17 +142,17 @@ class Graph extends Component {
 
       newState.nodesDic[this.state.nodes[i].name] = this.state.nodes[i];
 
-      console.log('adding to nodesDic'  + this.state.nodes[i].name);
+    //   console.log('adding to nodesDic'  + this.state.nodes[i].name);
 
     }
     this.setState(newState);
-    console.log('finished adding to nodesDic');
-    console.log(this.state.nodesDic);
+    // console.log('finished adding to nodesDic');
+    // console.log(this.state.nodesDic);
   }
 
   updateCenterNode(name){
     this.props.updateCenterNode(name);
-    console.log('Graph :you have touched ' + name);
+    // console.log('Graph :you have touched ' + name);
   }
 
 
@@ -139,8 +165,8 @@ class Graph extends Component {
         newState.nodes[i].location = location;
         // set new state
         this.setState(newState);
-        console.log('               location updated at:');
-        console.log(this.state.nodes[i]);
+        // console.log('               location updated at:');
+        // console.log(this.state.nodes[i]);
       }
 
   }
@@ -175,8 +201,8 @@ class Graph extends Component {
       }
     }
 
-    console.log('printing relationships');
-    console.log(this.state.relationships);
+    // console.log('printing relationships');
+    // console.log(this.state.relationships);
   }
 
   /*
@@ -240,7 +266,7 @@ class Graph extends Component {
 
   componentDidMount(){
     this.SortNodesIntoState(links);
-    console.log('graph mounted');
+    // console.log('graph mounted');
     // this.ConnectNodes();
 
   }
@@ -283,12 +309,12 @@ class Graph extends Component {
   }
 
   render(){
-    console.log('displaying graph node arrays below :');
-    console.log(this.state.row1);
-    console.log(this.state.row2);
-    console.log(this.state.row3);
-    console.log('current state is');
-    console.log(this.state);
+    // console.log('displaying graph node arrays below :');
+    // console.log(this.state.row1);
+    // console.log(this.state.row2);
+    // console.log(this.state.row3);
+    // console.log('current state is');
+    // console.log(this.state);
 
     /*
 
@@ -375,14 +401,14 @@ class Node extends Component{
 
   updateCenterNode(name){
     this.props.updateCenterNode(name);
-    console.log('you have touched' + this.state.name);
+    // console.log('you have touched' + this.state.name);
   }
 
   UpdateState(){
 
     if (this.props.name) {
       (this.setState({name:this.props.name}))
-      console.log( ' node: name update from-to '+  this.props.name + this.state.name);
+    //   console.log( ' node: name update from-to '+  this.props.name + this.state.name);
     };
     if (this.props.image) {
       (this.setState({image:this.props.image}))
@@ -392,7 +418,7 @@ class Node extends Component{
 
 
   measureView(event) {
-    console.log('event peroperties: ',  event.nativeEvent.layout.x, event.nativeEvent.layout.y,);
+    // console.log('event peroperties: ',  event.nativeEvent.layout.x, event.nativeEvent.layout.y,);
     this.setState({
             x: event.nativeEvent.layout.x,
             y: event.nativeEvent.layout.y,
@@ -426,29 +452,26 @@ class Node extends Component{
 
 
     return(
-
       <View ref={(ref) => { this.marker = ref }}
-onLayout={({nativeEvent}) => {
-  if (this.marker) {
-    this.marker.measure((x, y, width, height, pageX, pageY) => {
-              console.log(this.state.name, x, y, width, height, pageX, pageY);
-              var location = {
-                "x" : pageX,
-                "y" : pageY,
-              };
-              this.props.updateNodeLocation(this.state.name, location)
-     })
-  }
-}}>
-      <TouchableOpacity style={styles.button} onPress={() => this.updateCenterNode(this.state.name)}>
-       <Image
-         source={require('./stock-pokemon-photos/bulbasure.png')}
-         //borderRadius style will help us make the Round Shape Image
-         style={{ width: 60, height: 60, borderRadius: 100 / 2 }}
-       />
-       <Text style={styles.text}>{this.state.name}</Text>
-       </TouchableOpacity>
-
+        onLayout={({nativeEvent}) => {
+        if (this.marker) {
+          this.marker.measure((x, y, width, height, pageX, pageY) => {
+            console.log(this.state.name, x, y, width, height, pageX, pageY);
+            var location = {
+              "x" : pageX,
+              "y" : pageY,
+            };
+            this.props.updateNodeLocation(this.state.name, location)
+          })
+        }
+      }}>
+		<TouchableOpacity style={styles.button} onPress={() => this.updateCenterNode(this.state.name)}>
+			<Image
+				source={require('./stock-pokemon-photos/bulbasure.png')}
+				//borderRadius style will help us make the Round Shape Image
+				style={{ width: 60, height: 60, borderRadius: 100 / 2 }} />
+			<Text style={styles.text}>{this.state.name}</Text>
+		</TouchableOpacity>
      </View>
     )
 
