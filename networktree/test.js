@@ -29,9 +29,11 @@ var sampleLocation =
 class TestApp extends Component{
 	constructor(props){
 		super(props);
+    var inputNodes =nodes
 		this.state = {
-			nodes:nodes,
-			centerNode: nodes[0], // hardcoded center node
+			nodes:JSON.parse(JSON.stringify(inputNodes)),  // makes a deep copy of the original
+      originalNodes: inputNodes,
+			centerNode: inputNodes[0], // hardcoded center node
 			links: links,
 			updated: false
 		};
@@ -40,8 +42,13 @@ class TestApp extends Component{
 	UpdateCenterNode(name){
 		this.setState({
 			centerNode: this.FindNode(name),
+      nodes: JSON.parse(JSON.stringify(this.state.originalNodes)),
 			updated: true
 		})
+    // console.log('test app state while updating centernode');
+    // console.log(nodes);
+
+
 	}
 
 	FindNode(name){
@@ -56,46 +63,21 @@ class TestApp extends Component{
 	MakeGraph(centerNode){
 		if (this.state.updated == true){
 			this.setState({updated: false});
-			return null
+      console.log(this.state);
+			return null;
 		}
 		else {
 			return (
-				<Graph 
-					centerNode = {centerNode} 
-					nodes = {this.state.nodes} 
+				<Graph
+					centerNode = {centerNode}
+					nodes = {this.state.nodes}
 					links = {this.state.links}
 					updateCenterNode={this.UpdateCenterNode.bind(this)}
 				/>
 			)
 		}
 	}
-	// 	console.log("!@#", centerNode)
-	// 	if (centerNode.name == 'pikachu'){
-	// 		console.log("QWE")
-	// 		return (
-	// 			// <Graph 
-	// 			// 	centerNode = {nodes[0]} 
-	// 			// 	nodes = {this.state.nodes} 
-	// 			// 	links = {this.state.links}
-	// 			// 	updateCenterNode={this.UpdateCenterNode.bind(this)}
-	// 			// />
-	// 			<View><Text>123</Text></View>
-	// 		);
-	// 	}
-	// 	else {
-	// 		console.log("AAA")
-	// 		return (
-	// 			<Graph 
-	// 				centerNode = {nodes[1]} 
-	// 				nodes = {this.state.nodes} 
-	// 				links = {this.state.links}
-	// 				updateCenterNode={this.UpdateCenterNode.bind(this)}
-	// 			/>
-	// 		// <View><Text>123</Text></View>
 
-	// 		);
-	// 	}
-	// }
 
 	render(){
 		console.log('re rendering Graph: displaying  state  ');
@@ -127,9 +109,9 @@ class Graph extends Component {
 
     };
     // check initiation
-    //   console.log('graph initiated, centernode is ' + this.state.centerNode.name);
-    //   console.log('nodes recieved: ');
-    //   console.log(this.state.nodes);
+      console.log('graph initiated, centernode is ' + this.state.centerNode.name);
+      // console.log('initial state');
+      // console.log(this.state);
     // error checking
     if (!this.state.nodes) {
       new Error('Graph started with empty nodes state: empty graph');
@@ -196,6 +178,8 @@ class Graph extends Component {
           newState.relationships.push(<View><DrawLine x1= {x1} y1= {y1} x2= {x2} y2= {y2}/></View>);
           // set new state
           this.setState(newState);
+          console.log('connecting link' , this.state.links[i].person1, '->' , this.state.links[i].person2);
+          // console.log('current state', this.state);
         }
 
       }
@@ -205,6 +189,24 @@ class Graph extends Component {
     // console.log(this.state.relationships);
   }
 
+  WipeLocation(name){
+    var newNode = this.FindNode(name);
+    newNode.location = [];
+    this.ReplaceNode(name, newNode);
+
+  }
+  ReplaceNode(name, node){
+    var newState = {...this.state};
+    //mutates state
+    for (var i = 0; i < newState.nodes.length; i++) {
+      if (newState.nodes[i].name == name) {
+        newState.nodes[i] = node;
+      }
+    }
+    // newState[row].push(this.MakeNodeComponent(node));
+    // set new state
+    this.setState(newState);
+  }
   /*
   find the person in the nodes object
   return them in a list of the nodes object format
@@ -226,7 +228,9 @@ class Graph extends Component {
         if(link.person1 == this.state.centerNode.name){// if i am the parent
 
           // then person2 gets sent to row 3
+          this.WipeLocation(name);
           this.InsertInto(this.FindNode(link.person2), 'row3');
+
 
           // DEBUG:
           // console.log("row3 changed -newly added -----" );
@@ -235,6 +239,7 @@ class Graph extends Component {
         }else if (link.person2== this.state.centerNode.name) {
 
           // then person1 get sent to row 1
+          this.WipeLocation(name);
           this.InsertInto(this.FindNode(link.person1), 'row1');
         }
 
@@ -456,7 +461,7 @@ class Node extends Component{
         onLayout={({nativeEvent}) => {
         if (this.marker) {
           this.marker.measure((x, y, width, height, pageX, pageY) => {
-            console.log(this.state.name, x, y, width, height, pageX, pageY);
+            console.log('updating location for', this.state.name, x, y, width, height, pageX, pageY);
             var location = {
               "x" : pageX,
               "y" : pageY,

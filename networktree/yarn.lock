@@ -5357,6 +5357,11 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+react-dev-tools@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/react-dev-tools/-/react-dev-tools-0.0.1.tgz#f7cf35ad701db3c028280c632767fba6dba13ac7"
+  integrity sha1-9881rXAds8AoKAxjJ2f7ptuhOsc=
+
 react-devtools-core@^3.6.3:
   version "3.6.3"
   resolved "https://registry.yarnpkg.com/react-devtools-core/-/react-devtools-core-3.6.3.tgz#977d95b684c6ad28205f0c62e1e12c5f16675814"
