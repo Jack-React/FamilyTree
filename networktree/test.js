@@ -67,14 +67,14 @@ class TestApp extends Component{
   render(){
 
 
-    let graph;
-    graph = (this.MakeGraph(this.state.centerNode));
+    let graph = [];
+    graph.push(this.MakeGraph(this.state.centerNode));
     console.log('      re rendering Graph: displaying  state  ');
     console.log(this.state);
     console.log(graph);
     return(
 
-      graph
+      graph[graph.length-1]
   );
   }
 }
@@ -244,6 +244,31 @@ class Graph extends Component {
     // this.ConnectNodes();
 
   }
+
+//   ReMakeStateFromProp(){
+//     var state = {
+//       centerNode : this.props.centerNode, // this is me
+//       nodes: this.props.nodes,
+//       links: this.props.links,
+//       row1: [],          // one row per generation displayed
+//       row2: [],
+//       row3: [],
+//       nodesDic: {},       // converted nodes to dic for easier acess
+//       relationships: [],  // relationships are drawn links
+//       directRelationships : { // to check weather a relationship should be drawn
+//         "parent-child" : true,
+//
+//       }
+//     }
+//     this.setState(state);
+// }
+
+  // componentWillReceiveProps(nextProps){
+  //   // this.ReMakeStateFromProp();
+  //   this.constructor(this.props);
+  //   this.SortNodesIntoState(links);
+  //   console.log('recieved props');
+  // }
 
   //acepts a node object and makes a Node with it
   MakeNodeComponent(node){
