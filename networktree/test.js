@@ -284,7 +284,7 @@ class Graph extends Component {
         if(link.person1 == this.state.centerNode.name){// if i am the parent
 
           // then person2 gets sent to row 3
-          this.WipeLocation(name);
+          // this.WipeLocation(name);
           this.InsertInto(this.FindNode(link.person2), 'row3');
 
 
@@ -295,7 +295,7 @@ class Graph extends Component {
         }else if (link.person2== this.state.centerNode.name) {
 
           // then person1 get sent to row 1
-          this.WipeLocation(name);
+          // this.WipeLocation(name);
           this.InsertInto(this.FindNode(link.person1), 'row1');
         }
 
