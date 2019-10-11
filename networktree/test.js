@@ -12,12 +12,12 @@ import {
 import Svg,{Defs,Pattern, Circle, G, Path, Text as SvgText, Rect, TextPath, TSpan, Line,} from 'react-native-svg';
 
 var nodes = [
-  {"name": "bulbasure", "image":"mother"}, // temprary centerNode
-  {"name": "pikachu", "image":"son"},
-  {"name": "squrtile", "image":"son"},
-  {"name": "Charmander", "image":"son"},
-  {"name": "Charmeleon", "image":"son"},
-  {"name": "Charizard", "image":"son"},
+  {"name": "bulbasure", "image":"./stock-pokemon-photos/bulbasure.png"}, // temprary centerNode
+  {"name": "pikachu", "image":"./stock-pokemon-photos/pikachu.png"},
+  {"name": "squrtile", "image":"./stock-pokemon-photos/squrtile.png"},
+  {"name": "Charmander", "image":"./stock-pokemon-photos/charmander.png"},
+  {"name": "Charmeleon", "image":"./stock-pokemon-photos/charmeleon.png"},
+  {"name": "Charizard", "image":"./stock-pokemon-photos/Charizard.png"},
 
 ];
 
@@ -595,8 +595,9 @@ class Node extends Component{
       }}>
 		<TouchableOpacity style={styles.button} onPress={() => this.updateCenterNode(this.state.name)}>
 			<Image
-				source={require('./stock-pokemon-photos/bulbasure.png')}
-				//borderRadius style will help us make the Round Shape Image
+				source={require(this.props.image)}
+				// source={require('./stock-pokemon-photos/bulbasure.png')}
+				// swap the require on line 589 with the commented out one works
 				style={{ width: 60, height: 60, borderRadius: 100 / 2 }} />
 			<Text style={styles.text}>{this.state.name}</Text>
 		</TouchableOpacity>
