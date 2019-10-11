@@ -26,8 +26,11 @@ var links = [
   {"person1": "bulbasure", "person2": "squrtile", "relationship": "parent-child" },
   {"person1": "Charmander", "person2": "bulbasure", "relationship": "parent-child" },
   {"person1": "Charmeleon", "person2": "bulbasure", "relationship": "parent-child" },
-  {"person1": "Charizard", "person2": "Charmeleon", "relationship": "parent-child" }
+  {"person1": "Charizard", "person2": "Charmeleon", "relationship": "parent-child" },
+  {"person1": "Charmander", "person2": "Charmeleon", "relationship": "husband-wife" },
 ];
+
+const marriageNodeimg = './res/heart-outline.svg';
 
 
 class TestApp extends Component{
@@ -55,6 +58,7 @@ class TestApp extends Component{
 
 	}
 
+
 	FindNode(name){
 		for (var i = 0; i < this.state.nodes.length; i++) {
 			if (this.state.nodes[i].name == name ) {
@@ -75,7 +79,7 @@ class TestApp extends Component{
 				<Graph
 					centerNode = {centerNode}
 					nodes = {this.state.nodes}
-					links = {this.state.links}
+					links = {JSON.parse(JSON.stringify(this.state.links))}
 					updateCenterNode={this.UpdateCenterNode.bind(this)}
 				/>
 			)
@@ -87,7 +91,7 @@ class TestApp extends Component{
 		console.log('re rendering Graph: displaying  state  ');
 		// console.log(this.state);
 		return(
-			this.MakeGraph(this.state.centerNode)
+			this.MakeGraph(JSON.parse(JSON.stringify(this.state.centerNode)))
 		);
 	}
 }
@@ -109,6 +113,7 @@ class Graph extends Component {
       directRelationships : { // to check weather a relationship should be drawn
         "parent-child" : true,
       },
+      // sampleMarraigeNode: this.MakeMarriageNode('Charmander', 'Charmeleon'),
 
 
     };
@@ -131,9 +136,23 @@ class Graph extends Component {
     //   console.log('adding to nodesDic'  + this.state.nodes[i].name);
 
     }
+
+
     this.setState(newState);
     // console.log('finished adding to nodesDic');
     // console.log(this.state.nodesDic);
+  }
+
+  // looks at the links and returns a node for each marriage and inserts into state
+  MakeMarriageNode(person1, person2){
+    var marriageNode = {"name": person1+'-'+person2, "image":marriageNodeimg, "type": "husband-wife"};
+    var newState = {...this.state};
+    //mutates state
+    console.log(this.state);
+    newState.nodes.push(marriageNode);
+    // set new state
+    this.setState(newState);
+    return marriageNode;
   }
 
   updateCenterNode(name){
@@ -162,9 +181,38 @@ class Graph extends Component {
   this.RedrawRelationships(name);
 }
 
+ // can be redrawrelationships between name and anything else that links with it and has a Location
+ // or draw relationship between 2 nodes
+  RedrawRelationships(name, name2 = null){
+    if (name2) {
+      for (var i = 0; i < this.state.links.length; i++) {
+      if (
+        (this.state.links[i].person1 == name && this.state.links[i].person2 == name2)||
+        (this.state.links[i].person2 == name && this.state.links[i].person1 == name2)
+      ) {
+        // then find location of person1 and person 2 and draw a line between them
+        // if person1 and person2 has a location inside nodesDic
+        var p1Loc = this.state.nodesDic[this.state.links[i].person1].location;
+        var p2Loc = this.state.nodesDic[this.state.links[i].person2].location;
+        if (p1Loc &&p2Loc ) {
+          var newState = {...this.state};
+          //add a line connecting them
+          //only accepts strings so gotta coner the objects
+          var x1 = JSON.stringify(p1Loc.x);
+          var y1 = JSON.stringify(p1Loc.y);
+          var x2 = JSON.stringify(p2Loc.x);
+          var y2 = JSON.stringify(p2Loc.y);
 
-  RedrawRelationships(name){
-    for (var i = 0; i < this.state.links.length; i++) {
+          newState.relationships.push(<View><DrawLine x1= {x1} y1= {y1} x2= {x2} y2= {y2}/></View>);
+          // set new state
+          this.setState(newState);
+          console.log('connecting link' , this.state.links[i].person1, '->' , this.state.links[i].person2);
+          // console.log('current state', this.state);
+        }
+      }
+    }
+    } else{
+      for (var i = 0; i < this.state.links.length; i++) {
       if (this.state.links[i].person1 == name || this.state.links[i].person2 == name) {
         // then find location of person1 and person 2 and draw a line between them
         // if person1 and person2 has a location inside nodesDic
@@ -188,7 +236,7 @@ class Graph extends Component {
 
       }
     }
-
+    }
     // console.log('printing relationships');
     // console.log(this.state.relationships);
   }
@@ -225,9 +273,9 @@ class Graph extends Component {
 
      // loop over the relationships to determing positions
     for (var i = 0; i < links.length; i++) {
-
       let link = links[i];
 
+      // for all relationship is parent child
       if (link.relationship == "parent-child"){
         if(link.person1 == this.state.centerNode.name){// if i am the parent
 
@@ -247,6 +295,43 @@ class Graph extends Component {
           this.InsertInto(this.FindNode(link.person1), 'row1');
         }
 
+      }
+
+      // for all if the relationship is husband-wife
+      if (link.relationship == "husband-wife") {
+        // make a marriage  node
+        var marriageNode = this.MakeMarriageNode(link.person1,link.person2);
+
+        // where do i put it? ,
+        // if one of the perosn in the marriage is the child of center or parent of center
+        // then it gets put in that row
+        for (var j = 0; j < links.length; i++) {
+          let link2 = links[j];
+
+          // if(
+          //   (link2.person1 == link.person1) ||
+          //   (link2.person2 == link.person1) ||
+          //   (link2.person2 == link.person2) ||
+          //   (link2.person2 == link.person2)
+          // )
+
+          if (link2.relationship == "parent-child"){
+            // if either party from the marraige is a child of centernode
+            if(
+              ((link2.person2 == link.person1) || (link2.person2 == link.person2) ) &&
+              (link2.person1 == this.state.centerNode.name)
+            ){
+              this.InsertInto(marriageNode, 'row3');
+            }else if ( // if either party is the parent of centernode
+              ((link2.person1 == link.person1) || (link2.person1 == link.person2) ) &&
+              (link2.person1 == this.state.centerNode.name)
+            ) {
+
+              this.InsertInto(marriageNode, 'row1');
+            }
+
+        }
+      }
       }
     }
 
