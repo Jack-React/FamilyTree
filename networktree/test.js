@@ -287,6 +287,12 @@ class Graph extends Component {
           // this.WipeLocation(name);
           this.InsertInto(this.FindNode(link.person2), 'row3');
 
+          // find node, add to state along with the row number
+          var newNode = this.FindNode(link.person2);
+          newNode['row'] = 3;
+          this.ReplaceNode(link.person2, newNode);
+
+
 
           // DEBUG:
           // console.log("row3 changed -newly added -----" );
@@ -297,6 +303,9 @@ class Graph extends Component {
           // then person1 get sent to row 1
           // this.WipeLocation(name);
           this.InsertInto(this.FindNode(link.person1), 'row1');
+          var newNode = this.FindNode(link.person2);
+          newNode['row'] = 3;
+          this.ReplaceNode(link.person2, newNode);
         }
 
       }
