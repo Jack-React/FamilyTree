@@ -145,13 +145,17 @@ class Graph extends Component {
 
   // looks at the links and returns a node for each marriage and inserts into state
   MakeMarriageNode(person1, person2){
-    var marriageNode = {"name": person1+'-'+person2, "image":marriageNodeimg, "type": "husband-wife"};
+    var marriageNode = {
+      "name": person1+'-'+person2, "image":marriageNodeimg, "type": "husband-wife",
+      "person1" : person1, "person2": person2};
     var newState = {...this.state};
     //mutates state
-    console.log(this.state);
+    // console.log(this.state);
     newState.nodes.push(marriageNode);
     // set new state
     this.setState(newState);
+    console.log('marriageNode made between :', person1, person2);
+    console.log(marriageNode);
     return marriageNode;
   }
 
@@ -184,6 +188,7 @@ class Graph extends Component {
  // can be redrawrelationships between name and anything else that links with it and has a Location
  // or draw relationship between 2 nodes
   RedrawRelationships(name, name2 = null){
+    return null; // drawing relationship causes the crashing
     if (name2) {
       for (var i = 0; i < this.state.links.length; i++) {
       if (
@@ -271,30 +276,46 @@ class Graph extends Component {
    */
 
   SortNodesIntoState(links){
+    var insertedNodes = []; // for keeping track of which nodes have been inserted via marriage
 
     //add centernode into row2
-     this.InsertInto(this.state.centerNode, 'row2');
+    this.InsertInto(this.state.centerNode, 'row2');
+    insertedNodes.push(this.AddMarriagePartner(links,this.state.centerNode, 'row2'));
+
 
      // loop over the relationships to determing positions
+     // the order of inserting into row should be center>parents>child>
     for (var i = 0; i < links.length; i++) {
       let link = links[i];
 
+      // if the none of the nodes has been inserted before
+      if (!(insertedNodes.includes(link.person1) || insertedNodes.includes(link.person2))) {
+        // console.log('inserted nodes includes: ', insertedNodes);
+
+
       // for all relationship is parent child
+      // also if the other persons name is not on the traversed list
       if (link.relationship == "parent-child"){
         if(link.person1 == this.state.centerNode.name){// if i am the parent
 
           // then person2 gets sent to row 3
           this.InsertInto(this.FindNode(link.person2), 'row3');
+          insertedNodes.push(this.AddMarriagePartner(links,link.person2, 'row3'));
 
 
         }else if (link.person2== this.state.centerNode.name) {
 
           this.InsertInto(this.FindNode(link.person1), 'row1');
+          insertedNodes.push(this.AddMarriagePartner(links,link.person1, 'row1'));
 
 
         }
 
       }
+    }
+      // if (link.person1 == ) {
+      //
+      // }
 
       // for all if the relationship is husband-wife
       // if (link.relationship == "husband-wife") {
@@ -321,7 +342,39 @@ class Graph extends Component {
 
     return new Error('FindNode error, no node with matching name in this.state.nodes');
   }
-  // puts node in the row
+
+  // takes a name, looks through the links to see if they are married,
+  // add marriage node and partner node if married
+  // then return the partner node
+  AddMarriagePartner(links, name,row){
+    const debug_mode = 1;
+    if (debug_mode) console.log('finding marriage parter for ', name);
+    for (var i = 0; i < links.length; i++) {
+      let link = links[i];
+      if (
+        link.relationship == 'husband-wife' &&
+        link.person1 == name
+    ) {
+        if (debug_mode) console.log('partner is', link.person2);
+        this.InsertInto(this.MakeMarriageNode(name,link.person2), row);
+        this.InsertInto(this.FindNode(link.person2),row);
+        return link.person2;
+
+    } else if (
+      link.relationship == 'husband-wife' &&
+      link.person2 == name
+      ) {
+        if (debug_mode) console.log('partner is', link.person1);
+        this.InsertInto(this.MakeMarriageNode(link.person1,name), row);
+        this.InsertInto(this.FindNode(link.person1),row);
+        return link.person1;
+    }
+    }
+
+    return null;
+
+  }
+  // puts node in the row and changes its row attribute
   InsertInto(node, row){
     //copy state
     var newState = {...this.state};
@@ -368,12 +421,15 @@ class Graph extends Component {
 
   //acepts a node object and makes a Node with it
   MakeNodeComponent(node){
+    console.log('making node component for');
+    console.log(node);
     return (
       <View>
         <Node
           name = {node.name}
           updateNodeLocation={this.UpdateNodeLocation.bind(this)}
-          updateCenterNode={this.updateCenterNode.bind(this)}  />
+          updateCenterNode={this.updateCenterNode.bind(this)}
+          node = {node}  />
       </View>
       )
   }
@@ -516,6 +572,8 @@ class Node extends Component{
 
   componentDidMount(){
     this.UpdateState();
+    console.log("node mounted:");
+    console.log(this.props.node);
   }
 
   render(){
