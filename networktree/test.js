@@ -15,16 +15,20 @@ var nodes = [
   {"name": "bulbasure", "image":"mother"}, // temprary centerNode
   {"name": "pikachu", "image":"son"},
   {"name": "squrtile", "image":"son"},
+  {"name": "Charmander", "image":"son"},
+  {"name": "Charmeleon", "image":"son"},
+  {"name": "Charizard", "image":"son"},
 
 ];
 
 var links = [
   {"person1": "bulbasure", "person2": "pikachu", "relationship": "parent-child" },
   {"person1": "bulbasure", "person2": "squrtile", "relationship": "parent-child" },
+  {"person1": "Charmander", "person2": "bulbasure", "relationship": "parent-child" },
+  {"person1": "Charmeleon", "person2": "bulbasure", "relationship": "parent-child" },
+  {"person1": "Charizard", "person2": "Charmeleon", "relationship": "parent-child" }
 ];
 
-var sampleLocation =
-  {"x": "12", "y": "43", "z": "0" };
 
 class TestApp extends Component{
 	constructor(props){
