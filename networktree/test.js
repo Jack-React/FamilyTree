@@ -274,9 +274,6 @@ class Graph extends Component {
 
     //add centernode into row2
      this.InsertInto(this.state.centerNode, 'row2');
-     var newNode = this.FindNode(this.state.centerNode);
-     newNode['row'] = 2;
-     this.ReplaceNode(this.state.centerNode, newNode);
 
      // loop over the relationships to determing positions
     for (var i = 0; i < links.length; i++) {
@@ -287,28 +284,14 @@ class Graph extends Component {
         if(link.person1 == this.state.centerNode.name){// if i am the parent
 
           // then person2 gets sent to row 3
-          // this.WipeLocation(name);
           this.InsertInto(this.FindNode(link.person2), 'row3');
 
-          // find node, add to state along with the row number
-          var newNode = this.FindNode(link.person2);
-          newNode['row'] = 3;
-          this.ReplaceNode(link.person2, newNode);
-
-
-
-          // DEBUG:
-          // console.log("row3 changed -newly added -----" );
-          // console.log(this.MakeNodeComponent(node));
 
         }else if (link.person2== this.state.centerNode.name) {
 
-          // then person1 get sent to row 1
-          // this.WipeLocation(name);
           this.InsertInto(this.FindNode(link.person1), 'row1');
-          var newNode = this.FindNode(link.person2);
-          newNode['row'] = 1;
-          this.ReplaceNode(link.person2, newNode);
+
+
         }
 
       }
@@ -369,6 +352,9 @@ class Graph extends Component {
   InsertInto(node, row){
     //copy state
     var newState = {...this.state};
+    var newNode = this.FindNode(node.name);
+    newNode['row'] = row;
+    this.ReplaceNode(node.name, newNode);
     //mutates state
     newState[row].push(this.MakeNodeComponent(node));
     // set new state
