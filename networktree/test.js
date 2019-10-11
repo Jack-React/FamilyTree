@@ -274,6 +274,9 @@ class Graph extends Component {
 
     //add centernode into row2
      this.InsertInto(this.state.centerNode, 'row2');
+     var newNode = this.FindNode(this.state.centerNode);
+     newNode['row'] = 2;
+     this.ReplaceNode(this.state.centerNode, newNode);
 
      // loop over the relationships to determing positions
     for (var i = 0; i < links.length; i++) {
@@ -304,7 +307,7 @@ class Graph extends Component {
           // this.WipeLocation(name);
           this.InsertInto(this.FindNode(link.person1), 'row1');
           var newNode = this.FindNode(link.person2);
-          newNode['row'] = 3;
+          newNode['row'] = 1;
           this.ReplaceNode(link.person2, newNode);
         }
 
