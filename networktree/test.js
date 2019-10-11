@@ -1,16 +1,21 @@
 import React, { Component } from 'react';
 import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  StatusBar,
-  Image,
-  Text,
+    SafeAreaView,
+    StyleSheet,
+    ScrollView,
+    View,
+    StatusBar,
+    Image,
+    Text,
+    FlatList,
+    ActivityIndicator
 } from 'react-native';
 import Svg, { Defs, Pattern, Circle, G, Path, Text as SvgText, Rect, TextPath, TSpan, Line, } from 'react-native-svg';
 
 const ACCOUNTS = "http://52.14.226.1:8080/api/accounts"
+
+// ! for test only
+var centerUsrId = '597b0ddfe8e0bd240cc166f2f1ececb493cfda372865096fc84bb9ecbd362c55';
 
 var nodes = [
   {"name": "bulbasure", "image":"mother"}, // temprary centerNode
@@ -24,89 +29,88 @@ var links = [
   {"person1": "bulbasure", "person2": "squrtile", "relationship": "parent-child" },
 ];
 
-// ! Snail code from this line
-// fetch links data from server
-
-// this is the userid in the center
-var centerUsrId = '597b0ddfe8e0bd240cc166f2f1ececb493cfda372865096fc84bb9ecbd362c55';
-
-// this is the server url of relation links
-var linkurl = ACCOUNTS + "/relations/" + centerUsrId;
-
-// fetch the json data from links
-fetch(linkurl)
-    .then((res) => res.json())
-    .then((resjson) => { 
-        links = resjson.data;
-        console.log(links);
-    })
-    .catch((err) => { 
-        console.error(err);
-    });
-
-// fetch the name of given account_id
-function getInfo(userid) { 
-    var accountUrl = ACCOUNTS + userid;
-    fetch(accountUrl)
-        .then((res) => res.json())
-        .then((resjson) => {
-            console.log(resjson.data);
-
-            var firstName = resjson.data.firstName;
-            var lastName = resjson.data.lastName;
-            var name = firstName + ' ' + lastName;
-
-            console.log(name);
-            return name;
-        })
-        .catch((err) => { 
-            console.error(err);
-        });
-}
-
-// get unique id from links
-var userids = [];
-
-for (var i = 0; i < links.length; i++) { 
-    var person1id = links[i].person1;
-    var person2id = links[i].person2;
-    if (userids.indexOf(person1id) < 0)
-        userids.push(person1id);
-    if (userids.indexOf(person2id) < 0)
-        userids.push(person2id);
-}
-
-// create nodes
-var nodes = [];
-
-// ! For now, Nodes is [{"userid" : String, "name": String}], i.e. no image
-for (var i = 0; i < userids.length; i++) { 
-    var userid = userids[i];
-    var userName = getInfo(userid);
-    var data = {
-        userid: userid,
-        name: userName
-        }
-    nodes.push(data);
-}
-
-// ! Snail code to this line
-
 var sampleLocation =
   {"x": "12", "y": "43", "z": "0" };
 
 class TestApp extends Component{
-  constructor(props){
-    super(props);
-    this.state = {nodes:[]};
-  }
-  render(){
-    return(
+    constructor(props){
+        super(props);
+        this.state = {
+            nodes: [],
+            testnodes: [],
+            testlinks: [],
+            // * This bool is very important
+            // * Since it takes time to fetch data from server,
+            // * and we don't want app to do anything before it done.
+            isLoading: true
+        };
+    }
+    componentDidMount() { 
+        // fetch data from server
+        // this is the url of server for links and nodes
+        // ! The centerUsrId is for testing here, you may change it to google user id when runing in Family3
+        linkUrl = ACCOUNTS + "/relations/" + centerUsrId;
+        nodeUrl = ACCOUNTS + "/relationsinfo/" + centerUsrId;
 
-        <Graph centerNode = {nodes[0]} nodes = {nodes} links = {links}/>
+        // Actually, Networking is an inherently asynchronous operation. 
+        // Fetch methods will return a Promise that makes it straightforward 
+        // to write code that works in an asynchronous manner:
+        var firstAPICall = fetch(linkUrl);
+        var secondAPICall = fetch(nodeUrl);
 
-  );
-  }
+        // And here is how we deal with the promise return by fetch()
+        // Promise.all() is a function deal with multiple promise, and for details reading the page below
+        // https://medium.com/@gianpaul.r/fetching-from-multiple-api-endpoints-at-once-ffb1b54600f9
+        Promise.all([firstAPICall, secondAPICall])
+            .then(responses => Promise.all(responses.map(res => res.json())))   
+            .then(responseJsons => {
+                var testlinks = responseJsons[0].data;
+                var testnodes = responseJsons[1].data;
+
+                this.setState({
+                    isLoading: false,
+                    // ! You can change the testlinks to links when you are ready for further manipulation
+                    testlinks: testlinks,
+                    testnodes: testnodes
+                }, function () {
+
+                });
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+    render() {
+        // This is the loading page while fetching data
+        if (this.state.isLoading) {
+            return (
+                <View style={{ flex: 1, padding: 20 }}>
+                    <ActivityIndicator />
+                </View>
+            )
+        }
+
+        // ! This is the original test page showing family tree
+        // return (<Graph centerNode={nodes[0]} nodes={nodes} links={links} />);
+        
+        // This is a test page to prove that our data have been stored in state successfully
+        return (
+            <View style={{ flex: 1, paddingTop: 20 }}>
+                <Text>TestLinks:</Text>
+                <FlatList
+                    data={this.state.testlinks}
+                    renderItem={({ item }) => <Text>{item.person1}, {item.person2}, {item.relationship}</Text>}
+                    keyExtractor={({ id }, index) => id}
+                />
+                <Text>TestNodes:</Text>
+                <FlatList
+                    data={this.state.testnodes}
+                    renderItem={({ item }) => <Text>{item._id}, {item.name}</Text>}
+                    keyExtractor={({ id }, index) => id}
+                />
+            </View>
+        );
+    }
 }
 
 
