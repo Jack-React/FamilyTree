@@ -12,12 +12,12 @@ import {
 import Svg,{Defs,Pattern, Circle, G, Path, Text as SvgText, Rect, TextPath, TSpan, Line,} from 'react-native-svg';
 
 var nodes = [
-  {"name": "bulbasure", "image":"./stock-pokemon-photos/bulbasure.png"}, // temprary centerNode
-  {"name": "pikachu", "image":"./stock-pokemon-photos/pikachu.png"},
-  {"name": "squrtile", "image":"./stock-pokemon-photos/squrtile.png"},
-  {"name": "Charmander", "image":"./stock-pokemon-photos/charmander.png"},
-  {"name": "Charmeleon", "image":"./stock-pokemon-photos/charmeleon.png"},
-  {"name": "Charizard", "image":"./stock-pokemon-photos/Charizard.png"},
+  {"name": "bulbasure", "image":require("./stock-pokemon-photos/bulbasure.png")}, // temprary centerNode
+  {"name": "pikachu", "image":require("./stock-pokemon-photos/pikachu.png")},
+  {"name": "squrtile", "image":require("./stock-pokemon-photos/squrtile.png")},
+  {"name": "Charmander", "image":require("./stock-pokemon-photos/charmander.png")},
+  {"name": "Charmeleon", "image":require("./stock-pokemon-photos/charmeleon.png")},
+  {"name": "Charizard", "image":require("./stock-pokemon-photos/charizard.png")},
 
 ];
 
@@ -30,7 +30,7 @@ var links = [
   {"person1": "Charmander", "person2": "Charmeleon", "relationship": "husband-wife" },
 ];
 
-const marriageNodeimg = './res/heart-outline.svg';
+const marriageNodeimg = require('./res/heart-outline.png');
 
 
 class TestApp extends Component{
@@ -57,6 +57,23 @@ class TestApp extends Component{
 
 
 	}
+
+  //update image urls to require, for dynamic image loading and replaces the state
+  // UpdateImageUrls(nodes){
+  //   var newNodes = JSON.parse(JSON.stringify(nodes));
+  //   for (var i = 0; i < newNodes.length; i++) {
+  //     newNodes[i].image = require(nodes[i].image);
+  //   }
+  //   var newState = {...this.state};
+  //   //mutates state
+  //   // console.log(this.state);
+  //   newState.nodes = newNodes;
+  //   // set new state
+  //   this.setState(newState);
+  //
+  //
+  //
+  // }
 
 
 	FindNode(name){
@@ -146,7 +163,7 @@ class Graph extends Component {
   // looks at the links and returns a node for each marriage and inserts into state
   MakeMarriageNode(person1, person2){
     var marriageNode = {
-      "name": person1+'-'+person2, "image":marriageNodeimg, "type": "husband-wife",
+      "name": person1[0]+'-'+person2[0], "image":marriageNodeimg, "type": "husband-wife",
       "person1" : person1, "person2": person2};
     var newState = {...this.state};
     //mutates state
@@ -280,7 +297,7 @@ class Graph extends Component {
 
     //add centernode into row2
     this.InsertInto(this.state.centerNode, 'row2');
-    insertedNodes.push(this.AddMarriagePartner(links,this.state.centerNode, 'row2'));
+    insertedNodes.push(this.AddMarriagePartner(links,this.state.centerNode.name, 'row2'));
 
 
      // loop over the relationships to determing positions
@@ -347,16 +364,22 @@ class Graph extends Component {
   // add marriage node and partner node if married
   // then return the partner node
   AddMarriagePartner(links, name,row){
+    const imageStyle = (styles.marriageNodeImageStyle);
     const debug_mode = 1;
     if (debug_mode) console.log('finding marriage parter for ', name);
     for (var i = 0; i < links.length; i++) {
       let link = links[i];
+    //   console.log('name - person1 - person2 :' ,name, link.person1,link.person2,
+    //   ' realtionship: ', link.relationship,
+    //   'testing if name match',(link.person1 == name)  ,(link.person2 == name)
+    //
+    // );
       if (
         link.relationship == 'husband-wife' &&
         link.person1 == name
     ) {
         if (debug_mode) console.log('partner is', link.person2);
-        this.InsertInto(this.MakeMarriageNode(name,link.person2), row);
+        this.InsertInto(this.MakeMarriageNode(name,link.person2), row,imageStyle);
         this.InsertInto(this.FindNode(link.person2),row);
         return link.person2;
 
@@ -365,7 +388,7 @@ class Graph extends Component {
       link.person2 == name
       ) {
         if (debug_mode) console.log('partner is', link.person1);
-        this.InsertInto(this.MakeMarriageNode(link.person1,name), row);
+        this.InsertInto(this.MakeMarriageNode(link.person1,name), row,imageStyle);
         this.InsertInto(this.FindNode(link.person1),row);
         return link.person1;
     }
@@ -375,14 +398,14 @@ class Graph extends Component {
 
   }
   // puts node in the row and changes its row attribute
-  InsertInto(node, row){
+  InsertInto(node, row, imageStyle = null){ // imagestyle could be change to a styles object later
     //copy state
     var newState = {...this.state};
     var newNode = this.FindNode(node.name);
     newNode['row'] = row;
     this.ReplaceNode(node.name, newNode);
     //mutates state
-    newState[row].push(this.MakeNodeComponent(node));
+    newState[row].push(this.MakeNodeComponent(node,imageStyle));
     // set new state
     this.setState(newState);
   }
@@ -394,42 +417,20 @@ class Graph extends Component {
 
   }
 
-//   ReMakeStateFromProp(){
-//     var state = {
-//       centerNode : this.props.centerNode, // this is me
-//       nodes: this.props.nodes,
-//       links: this.props.links,
-//       row1: [],          // one row per generation displayed
-//       row2: [],
-//       row3: [],
-//       nodesDic: {},       // converted nodes to dic for easier acess
-//       relationships: [],  // relationships are drawn links
-//       directRelationships : { // to check weather a relationship should be drawn
-//         "parent-child" : true,
-//
-//       }
-//     }
-//     this.setState(state);
-// }
-
-  // componentWillReceiveProps(nextProps){
-  //   // this.ReMakeStateFromProp();
-  //   this.constructor(this.props);
-  //   this.SortNodesIntoState(links);
-  //   console.log('recieved props');
-  // }
 
   //acepts a node object and makes a Node with it
-  MakeNodeComponent(node){
+  MakeNodeComponent(node, imageStyle = null){
     console.log('making node component for');
     console.log(node);
     return (
       <View>
         <Node
           name = {node.name}
+          image = {node.image}
           updateNodeLocation={this.UpdateNodeLocation.bind(this)}
           updateCenterNode={this.updateCenterNode.bind(this)}
-          node = {node}  />
+          node = {node}
+          imageStyle = {imageStyle}  />
       </View>
       )
   }
@@ -514,10 +515,13 @@ class Row extends Component{
 class Node extends Component{
   constructor(props){
     super(props);
+    // defaults
     this.state = {
       name:'bulbasure',
-      image: './stock-pokemon-photos/bulbasure.png ',
+      image: require('./stock-pokemon-photos/bulbasure.png'), // current default image
+      imageStyle: (styles.defaultNodeImageStyle),
     };
+
 
   }
   // this is stored in the nparent
@@ -538,6 +542,9 @@ class Node extends Component{
     };
     if (this.props.image) {
       (this.setState({image:this.props.image}))
+    };
+    if (this.props.imageStyle) {
+      (this.setState({imageStyle:this.props.imageStyle}))
     };
     // updateNodeLocation(this.state.name, );
   }
@@ -577,6 +584,7 @@ class Node extends Component{
   }
 
   render(){
+    // var icon = (this.props.image)? this.props.image : require('./stock-pokemon-photos/bulbasure.png')
 
 
     return(
@@ -595,10 +603,8 @@ class Node extends Component{
       }}>
 		<TouchableOpacity style={styles.button} onPress={() => this.updateCenterNode(this.state.name)}>
 			<Image
-				source={require(this.props.image)}
-				// source={require('./stock-pokemon-photos/bulbasure.png')}
-				// swap the require on line 589 with the commented out one works
-				style={{ width: 60, height: 60, borderRadius: 100 / 2 }} />
+				source={this.state.image}
+				style={this.state.imageStyle} />
 			<Text style={styles.text}>{this.state.name}</Text>
 		</TouchableOpacity>
      </View>
@@ -650,6 +656,13 @@ const styles = {
     backgroundColor: '#DDDDDD',
     padding: 10
   },
+  defaultNodeImageStyle:{ width: 60, height: 60, borderRadius: 100 / 2 },
+  marriageNodeImageStyle: {
+    width: 20,
+    height: 20,
+    borderRadius: 100 / 2
+  },
+
 }
 
 export default TestApp;
