@@ -256,24 +256,26 @@ class Graph extends Component {
     for (var i = 0; i < this.state.nodes.length; i++) {
       var node = this.state.nodes[i];
       if (node.type == 'husband-wife') {
-        var husbandAndWife = [node.person1, node.person2];
 
-        // linking wife this line causes the crash
-        // console.log('linking', node.name, '->', node.person1);
-        // this.DrawBetween(this.state.nodesDic[node.person1].location,this.state.nodesDic[node.name].location);
-        // console.log('found marriage between', husbandAndWife);
+
+        // linking wife this line causes the crash, may be because of svg
+        // guess ill just directly link the husband to wife then
+        this.DrawBetween(this.state.nodesDic[node.person1].location,this.state.nodesDic[node.person2].location);
         for (var j = 0; j < this.state.links.length; j++) {
           var link =  this.state.links[j];
-          if (node.person1 == link.person1) {
+          if (node.person1 == link.person1 && !(node.person2 == link.person2)) {
             // draws aline with the marriage node if it is a child of the husband
             var p1Loc = this.state.nodesDic[node.name].location;
             var p2Loc = this.state.nodesDic[link.person2].location;
             if (p1Loc &&p2Loc ) console.log('linking', node.name, '->', link.person2);
             this.DrawBetween(p1Loc,p2Loc);
-          }else if (husbandAndWife.includes(link.person2)) {
-            var p1Loc = this.state.nodesDic[node.name].location;
-            var p2Loc = this.state.nodesDic[link.person1].location;
-            // this.DrawBetween(p1Loc,p2Loc);
+
+            // if (node.person2 == link.person2) {
+            //   var p1Loc = this.state.nodesDic[node.name].location;
+            //   var p2Loc = this.state.nodesDic[link.person1].location;
+            //   console.log('linking husband', node.name, '->', link.person1);
+            //   this.DrawBetween(p1Loc,p2Loc);
+            // }
           }
 
         }
