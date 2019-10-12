@@ -18,16 +18,23 @@ var nodes = [
   {"name": "Charmander", "image":require("./stock-pokemon-photos/charmander.png")},
   {"name": "Charmeleon", "image":require("./stock-pokemon-photos/charmeleon.png")},
   {"name": "Charizard", "image":require("./stock-pokemon-photos/charizard.png")},
+  {"name": "Ivysaur", "image":require("./stock-pokemon-photos/ivysaur.png")},
+  {"name": "Wartortle", "image":require("./stock-pokemon-photos/wartortle.png")},
 
 ];
 
 var links = [
   {"person1": "bulbasure", "person2": "pikachu", "relationship": "parent-child" },
   {"person1": "bulbasure", "person2": "squrtile", "relationship": "parent-child" },
+  {"person1": "Wartortle", "person2": "pikachu", "relationship": "parent-child" },
+  {"person1": "Wartortle", "person2": "squrtile", "relationship": "parent-child" },
   {"person1": "Charmander", "person2": "bulbasure", "relationship": "parent-child" },
   {"person1": "Charmeleon", "person2": "bulbasure", "relationship": "parent-child" },
   {"person1": "Charizard", "person2": "Charmeleon", "relationship": "parent-child" },
+  {"person1": "Ivysaur", "person2": "Charmeleon", "relationship": "parent-child" },
+  {"person1": "Charizard", "person2": "Ivysaur", "relationship": "husband-wife" },
   {"person1": "Charmander", "person2": "Charmeleon", "relationship": "husband-wife" },
+  {"person1": "Wartortle", "person2": "bulbasure", "relationship": "husband-wife" },
 ];
 
 const marriageNodeimg = require('./res/heart-outline.png');
@@ -126,6 +133,7 @@ class Graph extends Component {
       row2: [],
       row3: [],
       nodesDic: {},       // converted nodes to dic for easier acess
+      noNodesHaveLocation: 0,
       relationships: [],  // relationships are drawn links
       directRelationships : { // to check weather a relationship should be drawn
         "parent-child" : true,
@@ -175,7 +183,6 @@ class Graph extends Component {
     console.log(marriageNode);
     return marriageNode;
   }
-
   updateCenterNode(name){
     this.props.updateCenterNode(name);
     // console.log('Graph :you have touched ' + name);
@@ -189,6 +196,8 @@ class Graph extends Component {
         var newState = {...this.state};
         //mutates state
         newState.nodes[i].location = location;
+        newState.noNodesHaveLocation +=1;
+        console.log(newState.noNodesHaveLocation, ' nodes have received location');
         // set new state
         this.setState(newState);
         // console.log('               location updated at:');
@@ -199,73 +208,141 @@ class Graph extends Component {
   this.MakeNodesDic();
 
   // also draws relationships
-  this.RedrawRelationships(name);
+  // i could make more efficient by making it only get called once
+  var allNodesHaveLocation = true;
+  for (var i = 0; i < newState.nodes.length; i++) {
+    // allNodesHaveLocation = true;
+    if (!newState.nodes[i].location && newState.nodes[i].row) {
+      allNodesHaveLocation = false;
+    }
+  }
+  if (allNodesHaveLocation) {
+    console.log('all nodes have location, starting to draw realationships');
+    console.log(newState.nodes);
+    this.RedrawRelationships(name);
+  }
+
+
 }
 
+  DrawBetween(p1Loc, p2Loc){
+    // if (this.state.relationships.length > 20) {
+    //   return null;
+    // }
+    if (p1Loc &&p2Loc ) {
+      var newState = {...this.state};
+      //add a line connecting them
+      //only accepts strings so gotta coner the objects
+      var x1 = JSON.stringify(p1Loc.x);
+      var y1 = JSON.stringify(p1Loc.y);
+      var x2 = JSON.stringify(p2Loc.x);
+      var y2 = JSON.stringify(p2Loc.y);
+
+      newState.relationships.push(<View><DrawLine x1= {x1} y1= {y1} x2= {x2} y2= {y2}/></View>);
+      // set new state
+      this.setState(newState);
+      // console.log('connecting link' , this.state.links[i].person1, '->' , this.state.links[i].person2);
+      // console.log('current state', this.state);
+    }
+  }
+
  // can be redrawrelationships between name and anything else that links with it and has a Location
- // or draw relationship between 2 nodes
+ //  could probs make this more efficient if it is not called everytime a location is updated
+ //  refactored so it draws a relationship when encountering a marriagenode
   RedrawRelationships(name, name2 = null){
-    return null; // drawing relationship causes the crashing
-    if (name2) {
-      for (var i = 0; i < this.state.links.length; i++) {
-      if (
-        (this.state.links[i].person1 == name && this.state.links[i].person2 == name2)||
-        (this.state.links[i].person2 == name && this.state.links[i].person1 == name2)
-      ) {
-        // then find location of person1 and person 2 and draw a line between them
-        // if person1 and person2 has a location inside nodesDic
-        var p1Loc = this.state.nodesDic[this.state.links[i].person1].location;
-        var p2Loc = this.state.nodesDic[this.state.links[i].person2].location;
-        if (p1Loc &&p2Loc ) {
-          var newState = {...this.state};
-          //add a line connecting them
-          //only accepts strings so gotta coner the objects
-          var x1 = JSON.stringify(p1Loc.x);
-          var y1 = JSON.stringify(p1Loc.y);
-          var x2 = JSON.stringify(p2Loc.x);
-          var y2 = JSON.stringify(p2Loc.y);
+    // eachtime it finds a marriageNode
+    // it looks for the links which contains any of the names in the marriage nodes
+    // and draws a line between them if all of them has locations
+    for (var i = 0; i < this.state.nodes.length; i++) {
+      var node = this.state.nodes[i];
+      if (node.type == 'husband-wife') {
+        var husbandAndWife = [node.person1, node.person2];
 
-          newState.relationships.push(<View><DrawLine x1= {x1} y1= {y1} x2= {x2} y2= {y2}/></View>);
-          // set new state
-          this.setState(newState);
-          console.log('connecting link' , this.state.links[i].person1, '->' , this.state.links[i].person2);
-          // console.log('current state', this.state);
+        // linking wife this line causes the crash
+        // console.log('linking', node.name, '->', node.person1);
+        // this.DrawBetween(this.state.nodesDic[node.person1].location,this.state.nodesDic[node.name].location);
+        // console.log('found marriage between', husbandAndWife);
+        for (var j = 0; j < this.state.links.length; j++) {
+          var link =  this.state.links[j];
+          if (node.person1 == link.person1) {
+            // draws aline with the marriage node if it is a child of the husband
+            var p1Loc = this.state.nodesDic[node.name].location;
+            var p2Loc = this.state.nodesDic[link.person2].location;
+            if (p1Loc &&p2Loc ) console.log('linking', node.name, '->', link.person2);
+            this.DrawBetween(p1Loc,p2Loc);
+          }else if (husbandAndWife.includes(link.person2)) {
+            var p1Loc = this.state.nodesDic[node.name].location;
+            var p2Loc = this.state.nodesDic[link.person1].location;
+            // this.DrawBetween(p1Loc,p2Loc);
+          }
+
         }
       }
-    }
-    } else{
-      for (var i = 0; i < this.state.links.length; i++) {
-        // this person is inside the link and the link is suppose to have a direct realtionship
-        if (
-          (this.state.links[i].person1 == name || this.state.links[i].person2 == name) &&
-          (this.state.directRelationships[this.state.links[i].relationship])
-      ) {
-        // then find location of person1 and person 2 and draw a line between them
-        // if person1 and person2 has a location inside nodesDic
-        var p1Loc = this.state.nodesDic[this.state.links[i].person1].location;
-        var p2Loc = this.state.nodesDic[this.state.links[i].person2].location;
-        if (p1Loc &&p2Loc ) {
-          var newState = {...this.state};
-          //add a line connecting them
-          //only accepts strings so gotta coner the objects
-          var x1 = JSON.stringify(p1Loc.x);
-          var y1 = JSON.stringify(p1Loc.y);
-          var x2 = JSON.stringify(p2Loc.x);
-          var y2 = JSON.stringify(p2Loc.y);
 
-          newState.relationships.push(<View><DrawLine x1= {x1} y1= {y1} x2= {x2} y2= {y2}/></View>);
-          // set new state
-          this.setState(newState);
-          console.log('connecting link' , this.state.links[i].person1, '->' , this.state.links[i].person2);
-          // console.log('current state', this.state);
-        }
-
-      }
-    }
-    }
+  }
+    return null;
+  }
+    /* // if (name2) {
+    //   for (var i = 0; i < this.state.links.length; i++) {
+    //   if (
+    //     (this.state.links[i].person1 == name && this.state.links[i].person2 == name2)||
+    //     (this.state.links[i].person2 == name && this.state.links[i].person1 == name2)
+    //   ) {
+    //     // then find location of person1 and person 2 and draw a line between them
+    //     // if person1 and person2 has a location inside nodesDic
+    //     var p1Loc = this.state.nodesDic[this.state.links[i].person1].location;
+    //     var p2Loc = this.state.nodesDic[this.state.links[i].person2].location;
+    //     if (p1Loc &&p2Loc ) {
+    //       var newState = {...this.state};
+    //       //add a line connecting them
+    //       //only accepts strings so gotta coner the objects
+    //       var x1 = JSON.stringify(p1Loc.x);
+    //       var y1 = JSON.stringify(p1Loc.y);
+    //       var x2 = JSON.stringify(p2Loc.x);
+    //       var y2 = JSON.stringify(p2Loc.y);
+    //
+    //       newState.relationships.push(<View><DrawLine x1= {x1} y1= {y1} x2= {x2} y2= {y2}/></View>);
+    //       // set new state
+    //       this.setState(newState);
+    //       console.log('connecting link' , this.state.links[i].person1, '->' , this.state.links[i].person2);
+    //       // console.log('current state', this.state);
+    //     }
+    //   }
+    // }
+    // } else{
+    //   for (var i = 0; i < this.state.links.length; i++) {
+    //     // this person is inside the link and the link is suppose to have a direct realtionship
+    //     if (
+    //       (this.state.links[i].person1 == name || this.state.links[i].person2 == name) &&
+    //       (this.state.directRelationships[this.state.links[i].relationship])
+    //   ) {
+    //     // then find location of person1 and person 2 and draw a line between them
+    //     // if person1 and person2 has a location inside nodesDic
+    //     var p1Loc = this.state.nodesDic[this.state.links[i].person1].location;
+    //     var p2Loc = this.state.nodesDic[this.state.links[i].person2].location;
+    //     if (p1Loc &&p2Loc ) {
+    //       var newState = {...this.state};
+    //       //add a line connecting them
+    //       //only accepts strings so gotta coner the objects
+    //       var x1 = JSON.stringify(p1Loc.x);
+    //       var y1 = JSON.stringify(p1Loc.y);
+    //       var x2 = JSON.stringify(p2Loc.x);
+    //       var y2 = JSON.stringify(p2Loc.y);
+    //
+    //       newState.relationships.push(<View><DrawLine x1= {x1} y1= {y1} x2= {x2} y2= {y2}/></View>);
+    //       // set new state
+    //       this.setState(newState);
+    //       console.log('connecting link' , this.state.links[i].person1, '->' , this.state.links[i].person2);
+    //       // console.log('current state', this.state);
+    //     }
+    //
+    //   }
+    // }
+    // }
     // console.log('printing relationships');
     // console.log(this.state.relationships);
   }
+  */
 
   WipeLocation(name){
     var newNode = this.FindNode(name);
@@ -285,6 +362,7 @@ class Graph extends Component {
     // set new state
     this.setState(newState);
   }
+
   /*
   find the person in the nodes object
   return them in a list of the nodes object format
