@@ -92,7 +92,7 @@ class TestApp extends Component{
                 console.log(this.FindNode(nodes, userid))
 
                 this.setState({
-                    centerNode: this.FindNode(userid),
+                    centerNode: this.FindNode(nodes, userid),
                     originalNodes: JSON.parse(JSON.stringify(this.state.originalNodes)),
                     links: links,
                     nodes: nodes,
