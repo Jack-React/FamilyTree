@@ -7,9 +7,12 @@ import {
   StatusBar,
   Image,
   Text,
-  TouchableOpacity,
+    TouchableOpacity,
+    ActivityIndicator
 } from 'react-native';
-import Svg,{Defs,Pattern, Circle, G, Path, Text as SvgText, Rect, TextPath, TSpan, Line,} from 'react-native-svg';
+import Svg, { Defs, Pattern, Circle, G, Path, Text as SvgText, Rect, TextPath, TSpan, Line, } from 'react-native-svg';
+
+const ACCOUNTS = "http://52.14.226.1:8080/api/accounts";
 
 var nodes = [
   {"name": "bulbasure", "image":require("./stock-pokemon-photos/bulbasure.png")}, // temprary centerNode
@@ -39,30 +42,93 @@ var links = [
 
 const marriageNodeimg = require('./res/heart-outline.png');
 
-
 class TestApp extends Component{
 	constructor(props){
 		super(props);
-    var inputNodes =nodes
+        var inputNodes =nodes
 		this.state = {
 			nodes:JSON.parse(JSON.stringify(inputNodes)),  // makes a deep copy of the original
-      originalNodes: inputNodes,
+            originalNodes: inputNodes,
 			centerNode: inputNodes[0], // hardcoded center node
 			links: links,
-			updated: false
+            updated: true
 		};
-	}
+    }
 
-	UpdateCenterNode(name){
-		this.setState({
-			centerNode: this.FindNode(name),
-      nodes: JSON.parse(JSON.stringify(this.state.originalNodes)),
-			updated: true
-		})
-    // console.log('test app state while updating centernode');
-    // console.log(nodes);
+    componentDidMount() {
+        var centerUsrId = '597b0ddfe8e0bd240cc166f2f1ececb493cfda372865096fc84bb9ecbd362c55';
 
+        this.getDatafromAPI(centerUsrId);
+    }
 
+    getDatafromAPI(userid) {
+        // fetch data from server
+        // this is the url of server for links and nodes
+        // ! The centerUsrId is for testing here, you may change it to google user id when runing in Family3
+        linkUrl = ACCOUNTS + "/relations/" + userid;
+        nodeUrl = ACCOUNTS + "/relationsinfo/" + userid;
+
+        // Actually, Networking is an inherently asynchronous operation. 
+        // Fetch methods will return a Promise that makes it straightforward 
+        // to write code that works in an asynchronous manner:
+        var firstAPICall = fetch(linkUrl);
+        var secondAPICall = fetch(nodeUrl);
+
+        // And here is how we deal with the promise return by fetch()
+        // Promise.all() is a function deal with multiple promise, and for details reading the page below
+        // https://medium.com/@gianpaul.r/fetching-from-multiple-api-endpoints-at-once-ffb1b54600f9
+        Promise.all([firstAPICall, secondAPICall])
+            .then(responses => Promise.all(responses.map(res => res.json())))
+            .then(responseJsons => {
+                var links = responseJsons[0].data;
+                var nodes = responseJsons[1].data;
+
+                this.idToName(links, nodes);
+
+                console.log("new links is...")
+                console.log(links);
+
+                console.log("center node is ...")
+                console.log(this.FindNode(nodes, userid))
+
+                this.setState({
+                    centerNode: this.FindNode(userid),
+                    originalNodes: JSON.parse(JSON.stringify(this.state.originalNodes)),
+                    links: links,
+                    nodes: nodes,
+                    updated: false
+                }, function () {
+
+                });
+            })
+            .catch((error) => {
+                console.error(error);
+            }); 
+    }
+
+    idToName(links, nodes) {
+        links.forEach(element => {
+            var person1id = element.person1;
+            element.person1 = this.findName(nodes, person1id);
+            var person2id = element.person2;
+            element.person2 = this.findName(nodes, person2id);
+        });
+    }
+
+    findName(nodes, id) {
+        for (var i = 0; i < nodes.length; i++) {
+            if (id == nodes[i]._id)
+                return nodes[i].name;
+        }
+    }
+
+    UpdateCenterNode(id) {
+        this.setState({
+            updated: true
+        });
+        this.getDatafromAPI(id);
+        // console.log('test app state while updating centernode');
+        // console.log(nodes);
 	}
 
   //update image urls to require, for dynamic image loading and replaces the state
@@ -83,39 +149,32 @@ class TestApp extends Component{
   // }
 
 
-	FindNode(name){
-		for (var i = 0; i < this.state.nodes.length; i++) {
-			if (this.state.nodes[i].name == name ) {
-				return this.state.nodes[i];
+    FindNode(nodes, id) {
+		for (var i = 0; i < nodes.length; i++) {
+			if (id == nodes[i]._id) {
+				return nodes[i];
 			}
 		}
 		return new Error('FindNode error, no node with matching name in this.state.nodes');
 	}
 
-	MakeGraph(centerNode){
-		if (this.state.updated == true){
-			this.setState({updated: false});
-      console.log(this.state);
-			return null;
-		}
-		else {
-			return (
-				<Graph
-					centerNode = {centerNode}
-					nodes = {this.state.nodes}
-					links = {JSON.parse(JSON.stringify(this.state.links))}
-					updateCenterNode={this.UpdateCenterNode.bind(this)}
-				/>
-			)
-		}
-	}
-
-
-	render(){
+    render() {
+        if (this.state.updated) { 
+            return (
+                <View style={{ flex: 1, padding: 20 }}>
+                    <ActivityIndicator />
+                </View>
+            )
+        }
 		console.log('re rendering Graph: displaying  state  ');
-		// console.log(this.state);
+		console.log(this.state);
 		return(
-			this.MakeGraph(JSON.parse(JSON.stringify(this.state.centerNode)))
+            < Graph
+                centerNode = { this.state.centerNode }
+                nodes = { this.state.nodes }
+                links = { this.state.links }
+                updateCenterNode = { this.UpdateCenterNode.bind(this) }
+            />
 		);
 	}
 }
@@ -183,8 +242,8 @@ class Graph extends Component {
     console.log(marriageNode);
     return marriageNode;
   }
-  updateCenterNode(name){
-    this.props.updateCenterNode(name);
+  updateCenterNode(id){
+    this.props.updateCenterNode(id);
     // console.log('Graph :you have touched ' + name);
   }
 
@@ -405,7 +464,6 @@ class Graph extends Component {
           this.InsertInto(this.FindNode(link.person1), 'row1');
           insertedNodes.push(this.AddMarriagePartner(links,link.person1, 'row1'));
 
-
         }
 
       }
@@ -596,10 +654,11 @@ class Node extends Component{
   constructor(props){
     super(props);
     // defaults
-    this.state = {
-      name:'bulbasure',
-      image: require('./stock-pokemon-photos/bulbasure.png'), // current default image
-      imageStyle: (styles.defaultNodeImageStyle),
+      this.state = {
+        id: 'a',
+        name:'bulbasure',
+        image: require('./stock-pokemon-photos/bulbasure.png'), // current default image
+        imageStyle: (styles.defaultNodeImageStyle),
     };
 
 
@@ -609,8 +668,8 @@ class Node extends Component{
     this.props.updateNodeLocation(name,location);
   }
 
-  updateCenterNode(name){
-    this.props.updateCenterNode(name);
+  updateCenterNode(id){
+    this.props.updateCenterNode(id);
     // console.log('you have touched' + this.state.name);
   }
 
@@ -681,7 +740,7 @@ class Node extends Component{
           })
         }
       }}>
-		<TouchableOpacity style={styles.button} onPress={() => this.updateCenterNode(this.state.name)}>
+		<TouchableOpacity style={styles.button} onPress={() => this.updateCenterNode(this.state.id)}>
 			<Image
 				source={this.state.image}
 				style={this.state.imageStyle} />
