@@ -1,16 +1,12 @@
 import React, { Component } from 'react';
 import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
   View,
-  StatusBar,
   Image,
   Text,
-    TouchableOpacity,
-    ActivityIndicator
+  TouchableOpacity,
+  ActivityIndicator
 } from 'react-native';
-import Svg, { Defs, Pattern, Circle, G, Path, Text as SvgText, Rect, TextPath, TSpan, Line, } from 'react-native-svg';
+import Svg, { G, Path, Text as SvgText, Rect, Line, } from 'react-native-svg';
 
 const ACCOUNTS = "http://52.14.226.1:8080/api/accounts";
 
