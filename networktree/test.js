@@ -198,7 +198,7 @@ class Graph extends Component {
       directRelationships : { // to check weather a relationship should be drawn
         "parent-child" : true,
       },
-      // sampleMarraigeNode: this.MakeMarriageNode('Charmander', 'Charmeleon'),
+
 
 
     };
@@ -209,11 +209,10 @@ class Graph extends Component {
       console.log('initializing nodes ', this.state.nodes);
     }
 
-      // console.log('initial state');
-      // console.log(this.state);
+
     // error checking
     if (!this.state.nodes) {
-      new Error('Graph started with empty nodes state: empty graph');
+      new error('Graph started with empty nodes state: empty graph');
     }
   }
 
@@ -334,13 +333,6 @@ class Graph extends Component {
             var p2Loc = this.state.nodesDic[link.person2].location;
             if (p1Loc &&p2Loc ) console.log('linking', node.name, '->', link.person2);
             this.DrawBetween(p1Loc,p2Loc);
-
-            // if (node.person2 == link.person2) {
-            //   var p1Loc = this.state.nodesDic[node.name].location;
-            //   var p2Loc = this.state.nodesDic[link.person1].location;
-            //   console.log('linking husband', node.name, '->', link.person1);
-            //   this.DrawBetween(p1Loc,p2Loc);
-            // }
           }
 
         }
@@ -349,67 +341,7 @@ class Graph extends Component {
   }
     return null;
   }
-    /* // if (name2) {
-    //   for (var i = 0; i < this.state.links.length; i++) {
-    //   if (
-    //     (this.state.links[i].person1 == name && this.state.links[i].person2 == name2)||
-    //     (this.state.links[i].person2 == name && this.state.links[i].person1 == name2)
-    //   ) {
-    //     // then find location of person1 and person 2 and draw a line between them
-    //     // if person1 and person2 has a location inside nodesDic
-    //     var p1Loc = this.state.nodesDic[this.state.links[i].person1].location;
-    //     var p2Loc = this.state.nodesDic[this.state.links[i].person2].location;
-    //     if (p1Loc &&p2Loc ) {
-    //       var newState = {...this.state};
-    //       //add a line connecting them
-    //       //only accepts strings so gotta coner the objects
-    //       var x1 = JSON.stringify(p1Loc.x);
-    //       var y1 = JSON.stringify(p1Loc.y);
-    //       var x2 = JSON.stringify(p2Loc.x);
-    //       var y2 = JSON.stringify(p2Loc.y);
-    //
-    //       newState.relationships.push(<View><DrawLine x1= {x1} y1= {y1} x2= {x2} y2= {y2}/></View>);
-    //       // set new state
-    //       this.setState(newState);
-    //       console.log('connecting link' , this.state.links[i].person1, '->' , this.state.links[i].person2);
-    //       // console.log('current state', this.state);
-    //     }
-    //   }
-    // }
-    // } else{
-    //   for (var i = 0; i < this.state.links.length; i++) {
-    //     // this person is inside the link and the link is suppose to have a direct realtionship
-    //     if (
-    //       (this.state.links[i].person1 == name || this.state.links[i].person2 == name) &&
-    //       (this.state.directRelationships[this.state.links[i].relationship])
-    //   ) {
-    //     // then find location of person1 and person 2 and draw a line between them
-    //     // if person1 and person2 has a location inside nodesDic
-    //     var p1Loc = this.state.nodesDic[this.state.links[i].person1].location;
-    //     var p2Loc = this.state.nodesDic[this.state.links[i].person2].location;
-    //     if (p1Loc &&p2Loc ) {
-    //       var newState = {...this.state};
-    //       //add a line connecting them
-    //       //only accepts strings so gotta coner the objects
-    //       var x1 = JSON.stringify(p1Loc.x);
-    //       var y1 = JSON.stringify(p1Loc.y);
-    //       var x2 = JSON.stringify(p2Loc.x);
-    //       var y2 = JSON.stringify(p2Loc.y);
-    //
-    //       newState.relationships.push(<View><DrawLine x1= {x1} y1= {y1} x2= {x2} y2= {y2}/></View>);
-    //       // set new state
-    //       this.setState(newState);
-    //       console.log('connecting link' , this.state.links[i].person1, '->' , this.state.links[i].person2);
-    //       // console.log('current state', this.state);
-    //     }
-    //
-    //   }
-    // }
-    // }
-    // console.log('printing relationships');
-    // console.log(this.state.relationships);
-  }
-  */
+
 
   WipeLocation(name){
     var newNode = this.FindNode(name);
@@ -479,20 +411,7 @@ class Graph extends Component {
 
       }
     }
-      // if (link.person1 == ) {
-      //
-      // }
 
-      // for all if the relationship is husband-wife
-      // if (link.relationship == "husband-wife") {
-      //   // make a marriage  node
-      //   console.log('found husband-wife node');
-      //   var marriageNode = this.MakeMarriageNode(link.person1,link.person2);
-      //
-      //
-      //
-      //
-      // }
     }
 
     // return new Error('relationship between the nodes not in bound');
@@ -585,16 +504,7 @@ class Graph extends Component {
   }
 
   render(){
-    // console.log('displaying graph node arrays below :');
-    // console.log(this.state.row1);
-    // console.log(this.state.row2);
-    // console.log(this.state.row3);
-    // console.log('current state is');
-    // console.log(this.state);
 
-    /*
-
-     */
     return(
 
 
@@ -616,10 +526,7 @@ class Graph extends Component {
   }
 
 }
-// <Svg height="1000" width="1000">
-//   <Line x1="171.42857360839844" y1="267" x2="278.4761962890625" y2="475" stroke="red" strokeWidth="2" />
-// </Svg>
-// used to render lines
+
 class DrawLine extends Component{
   constructor(props){
     super(props);
@@ -637,10 +544,7 @@ class DrawLine extends Component{
     );
   }
 }
-// <Svg height="1000" width="1000">
-//   <Line x1={this.props.x1} y1={this.props.y1} x2={this.props.x2} y2={this.props.y2} stroke="red" strokeWidth="2" />
-// </Svg>
-// each row consists of people from the same generation
+
 class Row extends Component{
   constructor(props){
     super(props);
@@ -708,16 +612,6 @@ class Node extends Component{
             width: event.nativeEvent.layout.width,
             height: event.nativeEvent.layout.height
         })
-
-  // this works when put into node view method
-  //       ref={(ref) => { this.marker = ref }}
-  // onLayout={({nativeEvent}) => {
-  //   if (this.marker) {
-  //     this.marker.measure((x, y, width, height, pageX, pageY) => {
-  //               console.log(x, y, width, height, pageX, pageY);
-  //      })
-  //   }
-  // }}
 
     }
 
