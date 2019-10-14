@@ -14,30 +14,34 @@ import Svg, { Defs, Pattern, Circle, G, Path, Text as SvgText, Rect, TextPath, T
 
 const ACCOUNTS = "http://52.14.226.1:8080/api/accounts";
 
+var debug= {
+  'relationships': false,
+  'graphInitiation': true,
+}
 var nodes = [
   {"name": "bulbasure", "image":require("./stock-pokemon-photos/bulbasure.png")}, // temprary centerNode
-  {"name": "pikachu", "image":require("./stock-pokemon-photos/pikachu.png")},
-  {"name": "squrtile", "image":require("./stock-pokemon-photos/squrtile.png")},
-  {"name": "Charmander", "image":require("./stock-pokemon-photos/charmander.png")},
-  {"name": "Charmeleon", "image":require("./stock-pokemon-photos/charmeleon.png")},
-  {"name": "Charizard", "image":require("./stock-pokemon-photos/charizard.png")},
-  {"name": "Ivysaur", "image":require("./stock-pokemon-photos/ivysaur.png")},
-  {"name": "Wartortle", "image":require("./stock-pokemon-photos/wartortle.png")},
+  // {"name": "pikachu", "image":require("./stock-pokemon-photos/pikachu.png")},
+  // {"name": "squrtile", "image":require("./stock-pokemon-photos/squrtile.png")},
+  // {"name": "Charmander", "image":require("./stock-pokemon-photos/charmander.png")},
+  // {"name": "Charmeleon", "image":require("./stock-pokemon-photos/charmeleon.png")},
+  // {"name": "Charizard", "image":require("./stock-pokemon-photos/charizard.png")},
+  // {"name": "Ivysaur", "image":require("./stock-pokemon-photos/ivysaur.png")},
+  // {"name": "Wartortle", "image":require("./stock-pokemon-photos/wartortle.png")},
 
 ];
 
 var links = [
   {"person1": "bulbasure", "person2": "pikachu", "relationship": "parent-child" },
-  {"person1": "bulbasure", "person2": "squrtile", "relationship": "parent-child" },
-  {"person1": "Wartortle", "person2": "pikachu", "relationship": "parent-child" },
-  {"person1": "Wartortle", "person2": "squrtile", "relationship": "parent-child" },
-  {"person1": "Charmander", "person2": "bulbasure", "relationship": "parent-child" },
-  {"person1": "Charmeleon", "person2": "bulbasure", "relationship": "parent-child" },
-  {"person1": "Charizard", "person2": "Charmeleon", "relationship": "parent-child" },
-  {"person1": "Ivysaur", "person2": "Charmeleon", "relationship": "parent-child" },
-  {"person1": "Charizard", "person2": "Ivysaur", "relationship": "husband-wife" },
-  {"person1": "Charmander", "person2": "Charmeleon", "relationship": "husband-wife" },
-  {"person1": "Wartortle", "person2": "bulbasure", "relationship": "husband-wife" },
+  // {"person1": "bulbasure", "person2": "squrtile", "relationship": "parent-child" },
+  // {"person1": "Wartortle", "person2": "pikachu", "relationship": "parent-child" },
+  // {"person1": "Wartortle", "person2": "squrtile", "relationship": "parent-child" },
+  // {"person1": "Charmander", "person2": "bulbasure", "relationship": "parent-child" },
+  // {"person1": "Charmeleon", "person2": "bulbasure", "relationship": "parent-child" },
+  // {"person1": "Charizard", "person2": "Charmeleon", "relationship": "parent-child" },
+  // {"person1": "Ivysaur", "person2": "Charmeleon", "relationship": "parent-child" },
+  // {"person1": "Charizard", "person2": "Ivysaur", "relationship": "husband-wife" },
+  // {"person1": "Charmander", "person2": "Charmeleon", "relationship": "husband-wife" },
+  // {"person1": "Wartortle", "person2": "bulbasure", "relationship": "husband-wife" },
 ];
 
 const marriageNodeimg = require('./res/heart-outline.png');
@@ -68,8 +72,8 @@ class TestApp extends Component{
         linkUrl = ACCOUNTS + "/relations/" + userid;
         nodeUrl = ACCOUNTS + "/relationsinfo/" + userid;
 
-        // Actually, Networking is an inherently asynchronous operation. 
-        // Fetch methods will return a Promise that makes it straightforward 
+        // Actually, Networking is an inherently asynchronous operation.
+        // Fetch methods will return a Promise that makes it straightforward
         // to write code that works in an asynchronous manner:
         var firstAPICall = fetch(linkUrl);
         var secondAPICall = fetch(nodeUrl);
@@ -103,7 +107,7 @@ class TestApp extends Component{
             })
             .catch((error) => {
                 console.error(error);
-            }); 
+            });
     }
 
     idToName(links, nodes) {
@@ -159,7 +163,7 @@ class TestApp extends Component{
 	}
 
     render() {
-        if (this.state.updated) { 
+        if (this.state.updated) {
             return (
                 <View style={{ flex: 1, padding: 20 }}>
                     <ActivityIndicator />
@@ -202,7 +206,12 @@ class Graph extends Component {
 
     };
     // check initiation
+    if (debug.graphInitiation) {
       console.log('graph initiated, centernode is ' + this.state.centerNode.name);
+      console.log('initializing links', this.state.links);
+      console.log('initializing nodes ', this.state.nodes);
+    }
+
       // console.log('initial state');
       // console.log(this.state);
     // error checking
@@ -443,6 +452,11 @@ class Graph extends Component {
      // the order of inserting into row should be center>parents>child>
     for (var i = 0; i < links.length; i++) {
       let link = links[i];
+      if (debug.relationships) {
+        console.log('checking link: ', link);
+        console.log('centernode is : ', this.state.centerNode);
+        console.log('is p1 or p2 centernode?',link.person1 == this.state.centerNode.name, link.person2== this.state.centerNode.name );
+      }
 
       // if the none of the nodes has been inserted before
       if (!(insertedNodes.includes(link.person1) || insertedNodes.includes(link.person2))) {
@@ -549,7 +563,7 @@ class Graph extends Component {
   }
 
   componentDidMount(){
-    this.SortNodesIntoState(links);
+    this.SortNodesIntoState(this.state.links);
     // console.log('graph mounted');
     // this.ConnectNodes();
 
