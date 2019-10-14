@@ -14,6 +14,7 @@ import Svg, { Defs, Pattern, Circle, G, Path, Text as SvgText, Rect, TextPath, T
 
 const ACCOUNTS = "http://52.14.226.1:8080/api/accounts";
 
+// debug variables, change to true if you want to see the section
 var debug= {
   'relationships': false,
   'graphInitiation': true,
