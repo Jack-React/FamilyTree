@@ -10,12 +10,6 @@ import Svg, { G, Path, Text as SvgText, Rect, Line, } from 'react-native-svg';
 import Graph from './component/Graph.js';
 
 const ACCOUNTS = "http://52.14.226.1:8080/api/accounts";
-
-// debug variables, change to true if you want to see the section
-var debug= {
-  'relationships': false,
-  'graphInitiation': true,
-}
 var nodes = [
   {"name": "bulbasure", "image":require("../../assets/familytree/stock-pokemon-photos/bulbasure.png")}, // temprary centerNode
   // {"name": "pikachu", "image":require("./stock-pokemon-photos/pikachu.png")},
