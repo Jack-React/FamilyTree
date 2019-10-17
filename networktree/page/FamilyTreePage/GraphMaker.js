@@ -44,7 +44,7 @@ var links = [
 
 const marriageNodeimg = require('../../assets/familytree/heart-outline.png');
 
-class TestApp extends Component{
+class GraphMaker extends Component{
 	constructor(props){
 		super(props);
         var inputNodes =nodes
@@ -234,4 +234,4 @@ const styles = {
 
 }
 
-export default TestApp;
+export default GraphMaker;
