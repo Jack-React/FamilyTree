@@ -6,6 +6,9 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
+// constants
+const default_node_image = '../../../assets/familytree/stock-pokemon-photos/bulbasure.png';
+
 export default class Node extends Component{
   constructor(props){
     super(props);
@@ -13,7 +16,7 @@ export default class Node extends Component{
       this.state = {
         id: 'a',
         name:'bulbasure',
-        image: require('../stock-pokemon-photos/bulbasure.png'), // current default image
+        image: require(default_node_image), // current default image
         imageStyle: (styles.defaultNodeImageStyle),
     };
 

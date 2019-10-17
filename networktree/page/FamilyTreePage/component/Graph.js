@@ -7,182 +7,17 @@ import {
   ActivityIndicator
 } from 'react-native';
 import Svg, { G, Path, Text as SvgText, Rect, Line, } from 'react-native-svg';
-
-const ACCOUNTS = "http://52.14.226.1:8080/api/accounts";
-
-// debug variables, change to true if you want to see the section
+import DrawLine from './DrawLine';
+import Node from './Node';
 var debug= {
   'relationships': false,
   'graphInitiation': true,
 }
-var nodes = [
-  {"name": "bulbasure", "image":require("./stock-pokemon-photos/bulbasure.png")}, // temprary centerNode
-  // {"name": "pikachu", "image":require("./stock-pokemon-photos/pikachu.png")},
-  // {"name": "squrtile", "image":require("./stock-pokemon-photos/squrtile.png")},
-  // {"name": "Charmander", "image":require("./stock-pokemon-photos/charmander.png")},
-  // {"name": "Charmeleon", "image":require("./stock-pokemon-photos/charmeleon.png")},
-  // {"name": "Charizard", "image":require("./stock-pokemon-photos/charizard.png")},
-  // {"name": "Ivysaur", "image":require("./stock-pokemon-photos/ivysaur.png")},
-  // {"name": "Wartortle", "image":require("./stock-pokemon-photos/wartortle.png")},
 
-];
-
-var links = [
-  {"person1": "bulbasure", "person2": "pikachu", "relationship": "parent-child" },
-  // {"person1": "bulbasure", "person2": "squrtile", "relationship": "parent-child" },
-  // {"person1": "Wartortle", "person2": "pikachu", "relationship": "parent-child" },
-  // {"person1": "Wartortle", "person2": "squrtile", "relationship": "parent-child" },
-  // {"person1": "Charmander", "person2": "bulbasure", "relationship": "parent-child" },
-  // {"person1": "Charmeleon", "person2": "bulbasure", "relationship": "parent-child" },
-  // {"person1": "Charizard", "person2": "Charmeleon", "relationship": "parent-child" },
-  // {"person1": "Ivysaur", "person2": "Charmeleon", "relationship": "parent-child" },
-  // {"person1": "Charizard", "person2": "Ivysaur", "relationship": "husband-wife" },
-  // {"person1": "Charmander", "person2": "Charmeleon", "relationship": "husband-wife" },
-  // {"person1": "Wartortle", "person2": "bulbasure", "relationship": "husband-wife" },
-];
-
-const marriageNodeimg = require('./res/heart-outline.png');
-
-class TestApp extends Component{
-	constructor(props){
-		super(props);
-        var inputNodes =nodes
-		this.state = {
-			nodes:JSON.parse(JSON.stringify(inputNodes)),  // makes a deep copy of the original
-            originalNodes: inputNodes,
-			centerNode: inputNodes[0], // hardcoded center node
-			links: links,
-            updated: true
-		};
-    }
-
-    componentDidMount() {
-        var centerUsrId = '597b0ddfe8e0bd240cc166f2f1ececb493cfda372865096fc84bb9ecbd362c55';
-
-        this.getDatafromAPI(centerUsrId);
-    }
-
-    getDatafromAPI(userid) {
-        // fetch data from server
-        // this is the url of server for links and nodes
-        // ! The centerUsrId is for testing here, you may change it to google user id when runing in Family3
-        linkUrl = ACCOUNTS + "/relations/" + userid;
-        nodeUrl = ACCOUNTS + "/relationsinfo/" + userid;
-
-        // Actually, Networking is an inherently asynchronous operation.
-        // Fetch methods will return a Promise that makes it straightforward
-        // to write code that works in an asynchronous manner:
-        var firstAPICall = fetch(linkUrl);
-        var secondAPICall = fetch(nodeUrl);
-
-        // And here is how we deal with the promise return by fetch()
-        // Promise.all() is a function deal with multiple promise, and for details reading the page below
-        // https://medium.com/@gianpaul.r/fetching-from-multiple-api-endpoints-at-once-ffb1b54600f9
-        Promise.all([firstAPICall, secondAPICall])
-            .then(responses => Promise.all(responses.map(res => res.json())))
-            .then(responseJsons => {
-                var links = responseJsons[0].data;
-                var nodes = responseJsons[1].data;
-
-                this.idToName(links, nodes);
-
-                console.log("new links is...")
-                console.log(links);
-
-                console.log("center node is ...")
-                console.log(this.FindNode(nodes, userid))
-
-                this.setState({
-                    centerNode: this.FindNode(nodes, userid),
-                    originalNodes: JSON.parse(JSON.stringify(this.state.originalNodes)),
-                    links: links,
-                    nodes: nodes,
-                    updated: false
-                }, function () {
-
-                });
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    }
-
-    idToName(links, nodes) {
-        links.forEach(element => {
-            var person1id = element.person1;
-            element.person1 = this.findName(nodes, person1id);
-            var person2id = element.person2;
-            element.person2 = this.findName(nodes, person2id);
-        });
-    }
-
-    findName(nodes, id) {
-        for (var i = 0; i < nodes.length; i++) {
-            if (id == nodes[i]._id)
-                return nodes[i].name;
-        }
-    }
-
-    UpdateCenterNode(id) {
-        this.setState({
-            updated: true
-        });
-        this.getDatafromAPI(id);
-        // console.log('test app state while updating centernode');
-        // console.log(nodes);
-	}
-
-  //update image urls to require, for dynamic image loading and replaces the state
-  // UpdateImageUrls(nodes){
-  //   var newNodes = JSON.parse(JSON.stringify(nodes));
-  //   for (var i = 0; i < newNodes.length; i++) {
-  //     newNodes[i].image = require(nodes[i].image);
-  //   }
-  //   var newState = {...this.state};
-  //   //mutates state
-  //   // console.log(this.state);
-  //   newState.nodes = newNodes;
-  //   // set new state
-  //   this.setState(newState);
-  //
-  //
-  //
-  // }
-
-
-    FindNode(nodes, id) {
-		for (var i = 0; i < nodes.length; i++) {
-			if (id == nodes[i]._id) {
-				return nodes[i];
-			}
-		}
-		return new Error('FindNode error, no node with matching name in this.state.nodes');
-	}
-
-    render() {
-        if (this.state.updated) {
-            return (
-                <View style={{ flex: 1, padding: 20 }}>
-                    <ActivityIndicator />
-                </View>
-            )
-        }
-		console.log('re rendering Graph: displaying  state  ');
-		console.log(this.state);
-		return(
-            < Graph
-                centerNode = { this.state.centerNode }
-                nodes = { this.state.nodes }
-                links = { this.state.links }
-                updateCenterNode = { this.UpdateCenterNode.bind(this) }
-            />
-		);
-	}
-}
-
+const marriageNodeimg = '../../../assets/familytree/heart-outline.png';
 
 // used to render nodes and links in the right positions
-class Graph extends Component {
+export default class Graph extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -527,24 +362,6 @@ class Graph extends Component {
 
 }
 
-class DrawLine extends Component{
-  constructor(props){
-    super(props);
-
-  }
-
-  render(){
-    return(
-      <View style={{position: 'absolute'}} >
-
-      <Svg height="1000" width="1000">
-        <Line x1={this.props.x1} y1={this.props.y1} x2={this.props.x2} y2={this.props.y2} stroke="red" strokeWidth="2" />
-      </Svg>
-      </View>
-    );
-  }
-}
-
 class Row extends Component{
   constructor(props){
     super(props);
@@ -562,99 +379,6 @@ class Row extends Component{
         {this.props.nodes}
 
       </View>);
-  }
-}
-
-class Node extends Component{
-  constructor(props){
-    super(props);
-    // defaults
-      this.state = {
-        id: 'a',
-        name:'bulbasure',
-        image: require('./stock-pokemon-photos/bulbasure.png'), // current default image
-        imageStyle: (styles.defaultNodeImageStyle),
-    };
-
-
-  }
-  // this is stored in the nparent
-  updateNodeLocation(name,location){
-    this.props.updateNodeLocation(name,location);
-  }
-
-  updateCenterNode(id){
-    this.props.updateCenterNode(id);
-    // console.log('you have touched' + this.state.name);
-  }
-
-  UpdateState(){
-
-    if (this.props.name) {
-      (this.setState({name:this.props.name}))
-    //   console.log( ' node: name update from-to '+  this.props.name + this.state.name);
-    };
-    if (this.props.image) {
-      (this.setState({image:this.props.image}))
-    };
-    if (this.props.imageStyle) {
-      (this.setState({imageStyle:this.props.imageStyle}))
-    };
-    // updateNodeLocation(this.state.name, );
-  }
-
-
-  measureView(event) {
-    // console.log('event peroperties: ',  event.nativeEvent.layout.x, event.nativeEvent.layout.y,);
-    this.setState({
-            x: event.nativeEvent.layout.x,
-            y: event.nativeEvent.layout.y,
-            width: event.nativeEvent.layout.width,
-            height: event.nativeEvent.layout.height
-        })
-
-    }
-
-  // due to some weird thing with react unable to dynamicly load images not in use
-  // UpdateImage(){
-  //   const imgUrl = './stock-pokemon-photos/bulbasure.png ';
-  //   return (<Image x="0%" y="0%" width="512" height="512" href={require (imgUrl)}clipPath="url(#clip)"  ></Image>);
-  // }
-
-  componentDidMount(){
-    this.UpdateState();
-    console.log("node mounted:");
-    console.log(this.props.node);
-  }
-
-  render(){
-    // var icon = (this.props.image)? this.props.image : require('./stock-pokemon-photos/bulbasure.png')
-
-
-    return(
-      <View ref={(ref) => { this.marker = ref }}
-        onLayout={({nativeEvent}) => {
-        if (this.marker) {
-          this.marker.measure((x, y, width, height, pageX, pageY) => {
-            console.log('updating location for', this.state.name, x, y, width, height, pageX, pageY);
-            var location = {
-              "x" : pageX,
-              "y" : pageY,
-            };
-            this.props.updateNodeLocation(this.state.name, location)
-          })
-        }
-      }}>
-		<TouchableOpacity style={styles.button} onPress={() => this.updateCenterNode(this.state.id)}>
-			<Image
-				source={this.state.image}
-				style={this.state.imageStyle} />
-			<Text style={styles.text}>{this.state.name}</Text>
-		</TouchableOpacity>
-     </View>
-    )
-
-
   }
 }
 
@@ -708,5 +432,3 @@ const styles = {
   },
 
 }
-
-export default TestApp;
