@@ -15,7 +15,7 @@
     "react": "16.9.0",
     "react-dev-tools": "^0.0.1",
     "react-devtools": "^4.2.0",
-    "react-native": "0.61.1",
+    "react-native": "0.62.3",
     "react-native-d3-tree-graph": "^1.0.12",
     "react-native-network-graph": "^1.0.1",
     "react-native-svg": "^9.9.9"
